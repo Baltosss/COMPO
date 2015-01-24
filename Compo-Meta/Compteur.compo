@@ -1,0 +1,30 @@
+Descriptor Compteur extends Component
+{
+	provides {
+		default: {incrementer(); decrementer(val); initialiser(); showResult(); };
+	}
+	internally requires {
+		printer: { print(txt); };
+		compteurVal : SmallInteger;
+	}
+	architecture {
+		connect printer@self to printing@(Printer.new());
+	}
+	service incrementer() {
+		| t |
+		t := 1;
+		t := t + compteurVal.asString().asInteger();
+		disconnect compteurVal@self from default@compteurVal;
+		&compteurVal.connectTo(t.asInteger());
+	}
+	service decrementer() {
+		| t |
+		t := 1;
+	}
+	service initialiser() {
+		&compteurVal.connectTo(1);
+	}
+	service showResult() {
+		printer.print(compteurVal.asString());
+	}
+}
