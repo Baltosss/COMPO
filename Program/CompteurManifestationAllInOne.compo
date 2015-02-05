@@ -1,0 +1,45 @@
+Descriptor CompteurManifestationAllInOne extends Component
+{
+	provides {
+		default: {
+			 incrementer(); 
+			 initialiser();
+			 showResult();
+		};
+	}
+	
+	internally requires {
+		printer: { print(txt); };
+		compteurValPolice : SmallInteger;
+		compteurValSyndicat: SmallInteger;
+	}
+	
+	architecture {
+	    connect printer@self to printing@(Printer.new());
+	}
+	
+	service incrementer() {
+	    | t u |
+	    t := compteurValPolice.asString().asInteger() + 10;
+	    disconnect compteurValPolice@self from default@compteurValPolice;
+	    rockonnect compteurValPolice@default to t;
+		
+	    u := compteurValSyndicat.asString().asInteger() + 15;
+	    disconnect compteurValSyndicat@self from default@compteurValSyndicat;
+	    rockonnect compteurValSyndicat@default to u;
+	}
+
+	service initialiser() {
+	    &compteurValPolice.connectTo(5);
+	    &compteurValSyndicat.connectTo(10);
+	}
+	
+	service showResult() {
+		printer.print('---- Nombre de manifestants ----');
+		printer.print('Police : ');
+		printer.print(compteurValPolice.value().printString());
+		printer.print('Syndicat : ');
+		printer.print(compteurValSyndicat.value().printString());
+	}
+}
+
