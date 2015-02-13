@@ -1,0 +1,10 @@
+Descriptor ExpressivePerson extends Component {
+
+    provides {
+        chat: { chat(txt); };
+    }
+    
+    service chat(txt) {
+        return 'I am in love with you.';
+    }
+}

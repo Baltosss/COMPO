@@ -1,0 +1,19 @@
+Descriptor Interviewer extends Component {
+
+    provides {
+        interview: { interview(txt) };
+    }
+    
+    requires {
+        chat: { chat(txt); };
+    }
+    
+    architecture {
+        connect chat@self to chat@(SadPerson.new());
+    }
+    
+    service interview() {
+        Transcript.show('Hello, what do you think? ');
+        Transcript.crShow(chat@self.chat());
+    }
+}

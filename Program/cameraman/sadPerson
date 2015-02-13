@@ -1,0 +1,10 @@
+Descriptor SadPerson extends Component {
+
+    provides {
+        chat: { chat(txt); };
+    }
+    
+    service chat(txt) {
+        return 'You will fail your life.';
+    }
+}

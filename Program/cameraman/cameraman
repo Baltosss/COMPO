@@ -1,0 +1,19 @@
+Descriptor Cameraman extends Component {
+
+    provides {
+        listen: { listen(txt) };
+    }
+    
+    requires {
+        chat: { chat(txt); };
+    }
+    
+    architecture {
+        connect chat@self to chat@(interviewer.new());
+    }
+    
+    service listen() {
+        Transcript.show('The cameraman is listening... ');
+        Transcript.crShow(chat@self.chat());
+    }
+}
