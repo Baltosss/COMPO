@@ -1,0 +1,1068 @@
+\documentclass[11pt,a4paper,openany,oneside]{book}
+\usepackage[utf8]{inputenc}
+\usepackage[french]{babel}
+\bibliographystyle{unsrt}
+\usepackage{graphicx}
+\usepackage{ulem}
+\usepackage[cyr]{aeguill}
+\usepackage{hyperref}
+\usepackage{natbib}
+\usepackage[titletoc]{appendix}
+\usepackage[acronym, xindy, toc, nonumberlist]{glossaries}
+\usepackage{float}
+\usepackage{listings}
+\usepackage{color}
+\usepackage{array}
+\usepackage{lscape}
+\usepackage{amsthm}
+\usepackage{thmtools}
+
+\addtolength{\topmargin}{-30pt}
+\addtolength{\evensidemargin}{-27pt}
+\addtolength{\oddsidemargin}{-13pt}
+\addtolength{\textwidth}{40pt}
+\addtolength{\textheight}{50pt}
+\addtolength{\footskip}{12pt}
+\renewcommand{\headsep}{25pt} 
+
+\definecolor{dkgreen}{rgb}{0,0.6,0}
+\definecolor{gray}{rgb}{0.5,0.5,0.5}
+\definecolor{mauve}{rgb}{0.58,0,0.82}
+
+\renewcommand\thechapter {\Roman{chapter}}
+\addto\captionsfrench{\renewcommand{\glossaryname}{Glossaire}}
+\addto\captionsfrench{\renewcommand{\acronymname}{Acronymes}}
+\setcounter{secnumdepth}{2}
+\setcounter{tocdepth}{2}
+
+\lstset{frame=tb,
+  defaultdialect=Java,
+  aboveskip=3mm,
+  belowskip=3mm,
+  showstringspaces=false,
+  columns=flexible,
+  basicstyle={\small\ttfamily},
+  numbers=none,
+  numberstyle=\tiny\color{gray},
+  keywordstyle=\color{blue},
+  commentstyle=\color{dkgreen},
+  stringstyle=\color{mauve},
+  breaklines=true,
+  breakatwhitespace=true,
+  numbers=left,
+  tabsize=3
+}
+
+\definecolor{dkgreen2}{rgb}{0.1,0.8,0.1}
+\definecolor{gray2}{rgb}{0.7,0.3,0.2}
+\definecolor{mauve2}{rgb}{0.5,0.5,0.8}
+
+
+\lstdefinelanguage{Compo}
+{keywords={
+connect, delegate, to, architecture, service, provides, requires, internally requires, extends, Descriptor, provides, service, internally, rockonnect, disconnect},%
+sensitive=true,%
+alsoletter={\$},%
+comment=[l]{\#},%
+string=[b]",%
+string=[b]'%
+}
+
+
+
+\lstset{frame=tb,
+  defaultdialect=Compo,
+  aboveskip=3mm,
+  belowskip=3mm,
+  showstringspaces=false,
+  columns=flexible,
+  basicstyle={\small\ttfamily},
+  numbers=none,
+  numberstyle=\tiny\color{gray},
+  keywordstyle=\color{blue},
+  commentstyle=\color{dkgreen},
+  stringstyle=\color{mauve},
+  breaklines=true,
+  breakatwhitespace=true,
+  numbers=left,
+  tabsize=3
+}
+
+
+
+\title{Analyse d'un langage de programmation réflexif orienté composants \\ Etude de COMPO}
+
+\author{Anthony Ferrand \and Lucas Nelaupe \and Frédéric Verdier}
+
+\date\today
+
+\begin{document}
+
+\maketitle
+
+\chapter*{Résumé}
+
+\chapter*{Remerciements}
+
+Nous souhaitons remercier avant tout Monsieur Dony, notre tuteur lors du projet, pour ses très nombreux conseils et son regard critique et exigeant sur notre travail.\\
+Nous remercions aussi Monsieur Petr Spacek, créateur du langage COMPO, qui a bien voulu nous aider en répondant à toutes nos questions. \\
+Nous remercions également Monsieur Tibermacine, chercheur au LIRMM, pour ses nombreuses idées et interventions dans le cadre de notre projet.\\
+
+
+
+\tableofcontents
+
+\chapter{Introduction}
+
+\section{Définitions}
+
+\subsubsection{Paradigme composant}
+
+\subsubsection{Composant}
+
+Un composant est un élément du programme.
+
+\subsubsection{Port}
+
+\textit{"Un port est un point de connexion (les composants sont connectés par leurs ports) et de communication (les invocations de services sont transmises via les ports)."}[Définition de port dans \citep{articleToRead}]
+
+
+\subsubsection{Connexion}
+Une connexion représente un lien ou une voie de communication entre deux ports.
+
+\section{Contexte : La réutilisabilité en développement logiciel}
+
+Développer un logiciel est très coûteux. Cependant, certains éléments sont redondants entre tous les logiciels. Le but est de ne concevoir qu'une seule fois ce dont on a besoin. Si un programme a besoin d'un service que l'on a déjà développé pour un précédent logiciel, l'architecte n'aura cas reprendre le précédent service déjà développé qui fait ce dont il a besoin. On peut également imaginer une banque de composants considérés comme fiables par la profession. Cette banque serait disponible via Internet. Cela comporte un double avantage. D'une part, le développement logiciel sera d'autant plus rapide et donc moins coûteux. D'autre part, vu que ces composants sont déjà testés, le programme sera moins sujet aux erreurs.
+
+\subsection{Comment développer un programme pour que ses éléments soit réutilisables?}
+
+Les différents paradigmes de programmation qui sont majoritairement utilisés dans les langages ne permettent pas ou très peu la réutilisation. Actuellement, la réutilisabilité se limite surtout aux bibliothèques de logiciels qui ont été faites pour être réutilisables.
+
+\subsection{Solution : La programmation orientée composants}
+
+Il existe cependant un paradigme de programmation qui facilite la réutilisation : le paradigme composant. Chaque partie du programme est cloisonnée et ont des tâches précises. Le tout fonctionne par envois de messages. Cette séparation permet donc facilement de récupérer une partie du programme qui nous servira pour un autre.
+
+\section{Objectifs : Comprendre et améliorer le langage COMPO}
+
+Il existe très peu de langages actuellement qui permettent de faire de la programmation par composants. Nous avons cependant trouvé le langage COMPO, actuellement à l'état de prototype, et avons décidé de participer à son développement.
+
+\chapter{Le langage COMPO}
+
+COMPO est un langage réflexif de programmation et de modélisation orienté composants. Ce chapitre propose une approche pour se familiariser avec le langage.\\
+Nous utiliserons les termes présents dans la version actuelle de COMPO.
+
+\section{Les descripteurs de composants}
+
+Les composants sont décrits par un descripteur. Un composant est une instance du descripteur le décrivant. On peut faire le parallèle avec la programmation orientée objets où les objets sont des instances de classes.\\
+Les descripteurs sont eux-mêmes des composants décrits par leur méta-descripteur (\texttt{Descriptor} par défaut).
+
+\begin{figure}[H]
+	\centering
+	\includegraphics[keepaspectratio = true]{metamodel}
+	\caption{Métamodèle du langage COMPO extrait de \citep{these}}
+	\label{MetaModel}
+\end{figure}
+
+\subsection{Les informations présentes dans un descripteur}
+
+Afin de décrire un composant, il est nécessaire d'expliciter :
+\begin{description}
+\item[Le requis]Ce dont un composant a besoin pour fonctionner. Ici ces requis pourront être fournis grâce à d'autres composants.
+\item[Le fourni]Il s'agit des services que le composant décrit propose. Ces services pourront ainsi être proposés à d'autres composants.
+\item[Les services]COMPO étant un langage décrivant aussi la logique métier des composants. Cette logique métier se trouve dans les services des composants. Donc le descripteur doit aussi décrire le contenu des services proposés.
+\item[Les connexions entre composants internes]Les composants peuvent être eux-mêmes composés d'autres composants. On parle alors de \textbf{composites}. L'utilisateur d'un composite ne connaîtra pas ses connexions internes. C'est pourquoi le développeur ayant créé le descripteur doit pouvoir spécifier les connexions internes.
+\end{description}
+
+
+\subsection{Instanciation d'un composant}
+
+Pour créer une nouvelle instance d'un descripteur, il faut utiliser le service \texttt{new()}.\\
+Ce service présent dans tout les composants et renvoie le port fourni par défaut \texttt{default} d'une nouvelle instance du descripteur receveur courant.\\
+Voici la syntaxe d'utilisation de \texttt{new()} : 
+\begin{lstlisting}[language=Compo, frame=single, caption=Syntaxe de création d'un nouveau composant]
+<Descripteur>.new();
+\end{lstlisting}
+
+\subsection{Exemple de syntaxe d'un descripteur en COMPO}
+
+Maintenant que nous avons introduit les concepts de ports, services et descripteurs, nous allons donner la syntaxe générale d'un descripteur :
+\begin{lstlisting}[language=Compo, frame=single, caption=Syntaxe générale d'un descripteur]
+<Meta-descripteur> <Descripteur> extends <Super-descripteur>{
+    provides {
+        //ports fournis
+        <Declaration de port>
+    }
+    requires {
+        //ports requis
+        <Declaration de port>
+    }
+    internally requires {
+        //ports internes requis
+        <Declaration de port>
+    }
+    architecture {
+        //Connexions interne
+        <instructions de connexion>
+    }
+    //Definition des services
+    <Services>
+}
+\end{lstlisting}
+
+\section{Les ports}
+
+Un composant peut communiquer avec d'autres composants via ses ports. Un port est défini par un nom, une liste des signatures de services proposées, une visibilité, un rôle et une cardinalité.
+
+\subsection{Rôle}
+
+Un port peut avoir deux rôle : fournis (\texttt{provides}) ou requis (\texttt{requires}).
+
+\subsubsection{Fournis}
+
+Un port fournis liste les signatures de services qui sont offerts par un composant. 
+
+\subsubsection{Requis}
+
+Un port requis listera les signatures de services que le composant requiert pour fonctionner.
+
+\subsection{Visibilité}
+
+Un port peut être soit interne, soit externe.\\
+Un port interne ne sera pas visible (accessible) depuis l'environnement extérieur du composant. Ces ports servent à réaliser les connexions entre un composite et ses composants internes.\\
+Un port externe est visible depuis l'environnement extérieur du composant. Il peut être connecté à un autre composant.\\
+Par défaut un port est externe. Il faut préciser sa visibilité interne (\texttt{internally}) lorsqu'on veut un port interne.
+
+\subsection{Cardinalité}
+
+Un port peut être simple ou multiple.\\
+Un port simple peut être connecté à un autre port tandis qu'un port multiple est une collection de ports simples, identifiés par un index. Chacun des ports doit avoir la même liste de signatures de services.
+
+\subsection{Les ports par défauts}
+
+Tous les composants possèdent un port fourni externe par défaut nommé \textbf{default} qui fourni tous les services publiques du composant.\\
+Ils ont aussi un port interne requis unique nommé \textbf{self} listant l'ensemble des services qu'ils possèdent.\\
+Les composants possèdent également un autre port requis interne nommé \texttt{super} connecté au composant descripteur parent.\\
+Enfin ils possèdent un port interne requis multiple nommé \texttt{args}. Ce port permet lors d'une invocation de service de stocker les arguments s'il y en a.
+
+\subsection{Syntaxe générale de définition d'un port}
+
+Voici la syntaxe d'une clause de ports : \\
+\begin{lstlisting}[frame=single,caption=Syntaxe de la déclaration d'un port]
+<visibilite> <role> {
+    //Definition de la liste des services par extension
+    <Nom de port>:{ <signature service>; ... };
+    //ou par interface/descripteur
+    <Nom de port multiple>[]:<Interface||descripteur>;
+    ...
+}
+\end{lstlisting}
+
+\section{Les connexions}
+
+Les connexions permettent de lier des ports entre eux et ainsi de transmettre des invocations de service entre ports connectés.
+Les connexions dans COMPO peuvent être de deux types : connexion standard ou délégation.
+
+\subsection{Standard : requis-fourni}
+
+Une connexion classique permet de connecter un port requis avec un port fourni. Le port fourni ne peut être connecté à un port requis que si l'ensemble des signatures de services du port requis est un sous-ensemble de celui des signatures de services du port fourni.
+
+\begin{lstlisting}[language=Compo, frame=single, caption=Syntaxe de la connexion]
+//Connexion
+connect <port>@<composant> to <port>@<composant>; 
+\end{lstlisting}
+
+\subsection{Délégation : requis-requis ou fourni-fourni}
+Une délégation se fait entre deux port de même rôle. Elle sert à déléguer l'invocation de service d'un port à l'autre. Cette délégation n'est possible que si l'ensemble des signatures de services du port délégant est au moins un sous-ensemble des signatures de services du port à qui on délègue les invocations.
+
+\begin{lstlisting}[language=Compo, frame=single, caption=Syntaxe de la délégation]
+//Delegation
+delegate <port>@<composant> to <port>@<composant>;
+\end{lstlisting}
+
+\section{Architecture interne}
+
+Un descripteur peut décrire l'architecture interne d'un composite grâce à la clause \texttt{architecture}.\\
+Cette clause est une série d'instructions appelées à l'instanciation du composant permettant de créer sa structure interne. On y trouve ainsi l'ensemble des connexions à réaliser pour initialiser le composant dans ses ports internes.
+
+La clause d'architecture interne se définie de la façon suivante en COMPO : 
+
+\begin{lstlisting}[language=Compo, caption=Syntaxe de la définition d'une clause architecture, frame=single]
+architecture {
+    <instructions de connexion>
+}
+\end{lstlisting}
+
+\section{Les services}
+
+Les services implémentent la logique métier (ou comportement) du composant. Ils peuvent prendre des paramètres et retourner un composant par un de ses ports fournis.
+
+\subsection{L'invocation}
+
+L'invocation de service se fait à partir d'un port requis connecté à un port fourni passé sous forme d'argument.
+\begin{lstlisting}[frame=single, caption=Syntaxe de l'invocation de service]
+<portRequis>.<service>(<param1>, <param2...>);
+\end{lstlisting}
+
+\newpage
+
+\subsection{Les arguments}
+
+\subsection{Syntaxe générale d'un service}
+
+Un service est défini dans un descripteur avec la syntaxe suivante : 
+\begin{lstlisting}[language=Compo, frame=single, caption=Syntaxe de la définition d'un service]
+service <Nom>(<Parametre>, ...) {
+    <Instructions>
+}
+\end{lstlisting}
+
+\chapter{Réflexion sur les améliorations possibles de COMPO}
+
+\chaptermark{Améliorations possibles de COMPO}
+
+\section{Analyse des connexions}
+
+\subsection{Connexion standard}
+
+Elle s'apparente aux passages d'arguments Java. A savoir : le composant passé en argument peut être modifié, mais la variable extérieure gardera un lien sur celle-ci. La variable dans l'appel de la fonction et la variable dans les arguments de la fonction ne sont pas liées. La modification de l'une ne changera pas l'autre. On passe donc une référence vers le composant. Ce comportement est semblable à celui de C++ lorsque l'on utilise un passage d'arguments par \&. L'affectation d'une variable de type T\& changera la valeur, et non le pointeur vers celle-ci.
+
+\subsection{Délégation}
+    		
+Elle n'existe pas de façon non-programmatique en Java, mais son comportement peux être simulé par la création d'un objet intermédiaire. De même en C++, le problème n'est pas implémentée de façon non-programmatique. En effet, pour simuler cette connexion, il faudrait simuler un passage de pointeur \textit{immutable}, qui contiendrait une référence vers l'objet C. Un exemple est donné en annexe \ref{Annexe A} avec une implémentions en Java.
+
+\subsection{Connexion partagée : \{requis\}-fourni}
+Une connexion \{requis\}-fourni consiste à connecter un ensemble de ports requis à un port fourni.\\ 
+Si un des ports requis modifie la connexion, alors les autres ports requis seront modifiés de la même manière.\\
+Contrairement à la délégation, tout les ports peuvent modifier cette connexion. La figure~\ref{connexionPartagee} illustre l'idée proposée.
+\begin{figure}[H]
+\centering
+\includegraphics[scale=0.7, keepaspectratio=true]{connexionPartagee.png}
+\caption{Schéma d'une connexion partagée}
+\label{connexionPartagee}
+\end{figure}
+
+\subsubsection{Implémentation}
+Il n'existe pas de solution simple directement implémentable en COMPO. Voici néanmoins des solutions possibles d'extension du langage.
+
+\paragraph{Solution 1 : Passer par un composant gérant le partage}
+Cette solution implique d'ajouter un composant intermédiaire pour partager une connexion entre plusieurs composants. Voir figure \ref{solution1}.
+\begin{figure}[H]
+\centering
+\includegraphics[scale=0.7, keepaspectratio=true]{solution1.png}R
+\caption{Solution 1 : le composant \texttt{SharedConnectionManager} gère le partage de la connexion entre \texttt{A} et \texttt{B} vers \texttt{C}}
+\label{solution1}
+\end{figure}
+Le composant intermédiaire offre des opérations de connexion, déconnexion de son port requis via son port fourni.\\
+Les composants connectés au composant instance de \texttt{SharedConnectionManager} peuvent ainsi modifier par envois de messages la connexion entre le composant intermédiaire et \texttt{C} (impactant donc tous les autres composants).\\
+Afin de rendre invisible ce composant intermédiaire, il est nécessaire de modifier les ports requis actuels. Un port requis posséderait un booléen \texttt{isSharing}, vrai si et seulement si le port est connecté à un composant de connexion partagée intermédiaire. De plus il faudrait modifier les opérations \texttt{connectTo} (pour se connecter à un port fourni) et \texttt{disconnect} (pour se déconnecter d'un port fourni) afin de ne pas couper sa connexion avec le composant intermédiaire mais au contraire faire appel à son opération correspondante (si \texttt{isSharing} est vrai). A cela devra être rajouter une opération \texttt{endSharedConnection} afin de rompre la connexion entre le port et l'instance de \texttt{SharedConnexionManager}.\\
+Cette solution peut être actuellement implémentée dans COMPO sans modification du langage si on laisse le composant intermédiaire visible. Cela implique que le contenu des opérations des composants \texttt{A} et \texttt{B} doit prévoir une telle connexion partagée. C'est pourquoi il est préférable que la gestion de cette connexion partagée soit directement effectuée dans les ports.
+
+\paragraph{Solution 2 : Créer un nouveau type de port requis}
+Cette solution propose d'augmenter le langage COMPO avec un nouveau type de port évitant le passage par un composant intermédiaire. La figure~\ref{solution2} représente une implémentation de cette solution.\\
+\begin{figure}[H]
+\centering
+\includegraphics[scale=0.7, keepaspectratio=true]{solution2.png}
+\caption{Solution 2 : on utilise un port de type \texttt{SharedPort} pour créer une connexion partagée}
+\label{solution2}
+\end{figure}
+Ici on utilise un nouveau type de port nommé \texttt{SharedPort}. Celui-ci possède un port requis supplémentaire aux ports classiques \texttt{sharedPorts} qui sera connecté au port \texttt{default} d'un autre port instance de \texttt{SharedPort}.\\
+Ce nouveau port devra redéfinir ses opérations \texttt{connectTo} et \texttt{disconnect} afin d'appeler l'opération correspondante via son port \texttt{sharedPorts}.\\
+Grâce à l'utilisation d'une syntaxe adéquate, il est possible de rendre les connexions entre les ports qui partagent une connexion invisible pour l'utilisateur qui aura l'impression d'utiliser un port classique.
+
+\paragraph{Solution préconisée}
+La solution 2 demande 4 connexions pour chaque paire de connexion. Cela fait donc $2n$ connexions avec n le nombre de composants partagés.\\
+La solution 1 demande une connexion pour chaque composant partagé plus une connexion entre le composant intermédiaire et la cible. On obtient donc $n+1$ connexions.\\
+La solution 1 est donc plus économe en nombre de connexions dans tous les cas ($n>1$). Nous préconisons donc l'utilisation de la première solution.
+
+\subsubsection{Cas d'utilisation}
+Un composant ne peut pas anticiper comment il sera utilisé. Cela implique qu'un composant ne peut pas déterminer quel type de connexion sera utilisé sur ses ports requis externes.\\
+Par conséquent, pour une connexion E-fourni où E est un ensemble de ports requis, tout composant ayant un port requis externe appartenant à E ne peut initialiser la connexion (car sinon il anticiperait son utilisation).
+
+\subsubsection{Syntaxe proposée}
+Contrairement à la connexion standard ou à la délégation, la connexion partagée ne peut être implémentée rapidement par un utilisateur du langage COMPO. Il faut donc l'autoriser avec un raccourci syntaxique qui mettra en place automatiquement l'une des solutions proposées.\\
+Par exemple on peut imaginer la syntaxe suivante : 
+\begin{lstlisting}[language=Compo, frame=single,caption=Syntaxe de création d'une connexion partagée]
+connect {<portRequis>,<portRequis>} to <portFourni>;
+\end{lstlisting}
+
+\subsubsection{Comparaison avec C++}
+		
+La connexion partagée (voir figure~\ref{connexionPartagee}) ne possède pas d'équivalent en Java. Cependant en C/C++ elle s'apparente à l'utilisation de pointeurs. Ces pointeurs pointent sur la même adresse mémoire. Lorsque la valeur à cette adresse est modifiée, elle l'est pour toutes les variables pointant sur cette adresse. On retrouve ce comportement dans la connexion partagée où les ports requis sont des pointeurs pointant sur la même adresse mémoire (ici le port fourni).
+
+\begin{lstlisting}[language=C++, frame=single, caption=Exemple en c++]
+int *i = new int;
+int *j = i;
+*i = 5;
+cout << *j << endl; // Affiche : 5
+\end{lstlisting}
+
+\subsection{Conclusion}
+L'étude des autres langages a mis le doigt sur le fait que COMPO introduit une nouvelle façon de considérer le "passage de variables". Ce passage inédit est le passage par port requis (délégation). Bien que pouvant être simulé dans Java et C++, cette approche est visuelle et puissante dans les balbutiements du monde composants.\\
+De plus COMPO reprend les deux mécanismes principaux pour récupérer une valeur : par référence Java (connexion requis-fourni) ou par pointeur dé-référencé C++ (connexion \{requis\}-fourni).
+
+
+
+\newpage
+
+\section{Passage d'arguments}
+
+COMPO est un langage dont la communication entre composants est représentée par l'invocation d'opérations par leurs ports requis.\\
+Une opération est très similaire aux méthodes de classe dans un langage orienté objets.\\
+Comme pour une méthode, une opération peut prendre des arguments.
+Actuellement, les arguments des opérations de COMPO sont des ports requis internes du receveur courant représentés par le port multiple \texttt{args}.\\
+A l'invocation de l'opération, on passe alors des ports fournis en arguments qui seront connectés à \texttt{args} avant l'exécution du corps de l'opération. On obtient alors des connexions temporaires entre le receveur courant et les composants passés en argument.\\ 
+Si on pouvait diversifier le type des paramètres proposés, il pourrait être intéressant de permettre à une même opération d'avoir des comportements différents en fonction des types d'arguments proposés (surtout dans le cas où un service utilisera l'argument pour le connecter à un de ses ports).
+
+
+\subsection{Par composant}
+On peut dans un premier temps se demander si un argument représente un port ou un composant.\\
+Dans la programmation orientée composants, on ne peut communiquer avec un composant que grâce à ses ports. Il ne sert donc à rien de passer en argument un composant directement, car on ne peut que passer par ses ports pour communiquer avec.\\
+De manière générale, pour référencer une valeur, une "variable" devra toujours passer par un port du composant ciblé. Ainsi un argument ne peut avoir pour valeur qu'un port.
+
+\subsection{Par port fourni}
+\label{passageFourni}
+
+Dans ce cas on passe en argument un port fourni (mode de passage d'arguments actuellement utilisé dans COMPO), on obtient une architecture représentée par la figure~\ref{exempleFourni}.\\
+\begin{figure}[H]
+\centering
+\includegraphics[scale=0.7, keepaspectratio=true]{exempleFourni_1.png}
+\caption{Exemple lors d'un passage d'un port fourni en argument à \texttt{o}}
+\label{exempleFourni}
+\end{figure}
+On remarque que la connexion entre \texttt{rBC} et \texttt{fC} est conservée après la connexion de \texttt{rAC} à \texttt{fD}.
+Le passage d'un port fourni est comparable au passage d'arguments par références de Java : 
+\begin{lstlisting}[language=Java, caption=Equivalent en Java d'un passage de port fourni en paramètre de \texttt{o}]
+public void o(Port p) {
+    //Equivalent a une connexion
+    this.rBC = p;    
+}
+\end{lstlisting}
+
+
+\subsection{Par port requis}
+
+\label{passageRequis}
+On suppose pouvoir passer en paramètre de \texttt{o} le port requis et non le port fourni auquel il est connecté. \\
+On suppose également que l'instruction "\texttt{connect <portRequis> to <portRequis>;}" crée une délégation du premier port vers le second car sinon on ne pourrait pas exécuter \texttt{exec()} sans lever une exception.\\
+La figure~\ref{exempleRequis} montre ce que l'on obtient lors de l'exécution de \texttt{exec()}.
+\begin{figure}[H]
+\centering
+\includegraphics[scale=0.7, keepaspectratio=true]{exempleRequis.png}
+\caption{Exemple lors d'un passage d'un port requis en argument à \texttt{o}}
+\label{exempleRequis}
+\end{figure}
+On remarque que lors de la déconnexion de \texttt{rAC} à \texttt{fC}, \texttt{rBC} a aussi perdu son accès à \texttt{fC}. \texttt{rBC} obtient l'accès à \texttt{fD} grâce à la délégation.\\
+Le passage d'un port requis en argument est comparable au type de paramètre suivant en C++.
+
+\newpage
+
+\begin{lstlisting}[language=C++, caption=Equivalent en C++ d'un passage de port requis en paramètre de o]
+void B::o(Port& p) {
+    //Different de la delegation
+    this->rBC = p;  
+}
+\end{lstlisting}
+Cependant la délégation ne possède pas d'équivalent direct en C++. Dans la figure~\ref{exempleRequis}, \texttt{rBC} ne peut pas modifier la connexion entre \texttt{rAC} et \texttt{fC}. Il peut seulement se déconnecter de \texttt{rAC} (\texttt{this->rBC=NULL} en C++).
+
+\subsection{Qui choisit le mode de passage ?}
+
+Un composant ne peut pas anticiper son utilisation. Il ne peut donc pas anticiper comment il sera connecté à d'autres composants. Il est donc préférable que les composants ne choisissent que leurs connexions lors de l'initialisation et laissent leur conteneur choisir comment ils seront connectés à l'extérieur.\\
+De plus si un composant \texttt{A} connecté à \texttt{C} donne accès à \texttt{C} à un composant \texttt{B}, \texttt{A} devrait pouvoir choisir comment la connexion doit s'effectuer.\\
+Cependant il peut exister des cas particuliers dans lesquels l'exécution de l'opération de \texttt{B} ne peut pas fonctionner dans tous les cas. Il faut donc laisser un moyen à \texttt{B} de contraindre le type des arguments.
+
+Le choix du type de connexions créées par une opération \texttt{o} impliquant ses arguments est laissé à l'appelant de \texttt{o}. Néanmoins, dans la signature de l'opération, il est possible de restreindre le type des arguments.
+
+
+\subsection{Conséquence : Il faut les deux modes de passages}
+Le passage d'un port fourni en paramètre possède l'inconvénient de créer des architectures peu réactives aux changements. En effet dans l'exemple de la figure~\ref{exempleFourni}, lors du remplacement du composant C par un composant \texttt{D} par \texttt{A}, la modification n'est pas prise en compte par \texttt{B}.\\
+Au contraire, dans le passage d'un port requis, \texttt{rBC} reste toujours connecté au port connecté à \texttt{rAC} par délégation. Cela crée donc une architecture qui peut être modifiée plus facilement.\\
+Il existe des cas pour lesquels le second mode de passage d'argument ne convient pas. La figure~\ref{arrayConnexion} propose un exemple de cas où la délégation possède un comportement incompatible avec ce que l'on veut faire. Dans cet exemple, \texttt{A} invoque deux fois l'opération \texttt{add} de \texttt{B} en passant soit \texttt{value}, soit le port fourni connecté à \texttt{value} en paramètre. Entre ces invocations, A change la connexion de \texttt{value}. Les connexions en rouge sont créées si on appelle l'opération \texttt{add} en passant en paramètre un port requis. Les connexions en bleu sont créées si on appelle l'opération en passant en paramètre un port fourni.\\
+\begin{figure}[H]
+\centering
+\includegraphics[scale=0.7, keepaspectratio=true]{arrayConnexion.png}
+\caption{Cas d'ajout de valeur à un tableau selon que l'on passe un port fourni ou requis en argument de \texttt{add}}
+\label{arrayConnexion}
+\end{figure}
+On remarque que dans le cas où on passe un port requis en argument, la première valeur ajoutée au tableau n'est pas conservée. On obtient à la place deux fois la dernière valeur ajoutée.\\
+Il est donc nécessaire de conserver le passage d'argument par port fourni.
+
+\textbf{On doit donc pouvoir passer en arguments d'une opération des ports fournis ou requis.}
+
+\section{Type de retour d'opération}
+
+\subsection{Du point de vu de l'appelant}
+
+\subsubsection{Cas de renvoi d'un composant}
+On peut supposer que le retour d'une opération est un composant.\\
+Dans ce cas, il n'est pas possible d'enchaîner les opérations. Par exemple, on souhaite exécuter : "\texttt{portRequis.foo().bar();}". On obtiendra une erreur car \texttt{portRequis.foo()} renverra un composant. Or on ne peut invoquer des opérations sur les composants que par un port requis.\\
+De plus l'instruction "\texttt{connect monPortRequis to monAutrePortRequis.foo();}" ne fonctionnerait pas également. En effet on ne peut connecter un port qu'à un autre port et non un composant.\\
+Ce cas n'est donc pas approprié.
+
+\subsubsection{Cas de renvoi d'un port fourni}
+On peut supposer que le retour d'une opération renvoie un port fourni (par exemple \texttt{default}).\\
+Dans ce cas, il n'est pas possible d'enchaîner les opérations. Par exemple, on souhaite exécuter : "\texttt{portRequis.foo().bar();}".\\
+On obtiendra une erreur car \texttt{portRequis.foo()} renverra un port fourni. Or on ne peut invoquer des opérations que sur des ports requis.\\
+Si l'on veut faire cela, il ne faut pas renvoyer directement un port fourni.
+
+\subsubsection{Cas de renvoi d'un port requis}
+Le dernier cas de type de retour d'opération possible est de renvoyer un port requis.\\
+Dans ce cas l'appelant peut enchaîner les invocations d'opérations car on peut appeler des opérations sur les ports requis.\\
+En supposant que l'on accepte la syntaxe "\texttt{connect <portRequis> to <portRequis>}", on peut alors écrire : "\texttt{connect monPortRequis to monAutrePortRequis.foo();}". Cela créera une délégation de \texttt{monPortRequis} vers le résultat de  \texttt{monAutrePortRequis.foo()}.\\
+L'appel à \texttt{new()} ne pose également plus de problème. L'exécution de "\texttt{connect monPortRequis to portCible@(ComposantCible.new());}" est possible car : 
+\begin{itemize}
+\item \texttt{ComposantCible.new()} renvoie un port requis.
+\item \texttt{portCible@portRequis} renvoie le port fourni nommé \texttt{portCible} du composant connecté au port requis \texttt{portRequis}.
+\item \texttt{connect monPortRequis to portFourni} crée une connexion classique.
+\end{itemize}
+L'invocation d'une opération peut donc renvoyer un port requis.
+
+Les retours d'opérations (vus par l'appelant) sont des ports requis.
+
+
+
+\subsection{Du point de vu du receveur courant}
+Nous avons vu que les opérations renvoyaient des ports requis à l'appelant. Maintenant nous devons nous demander ce que renvoie l'exécution d'une opération. C'est à dire de quel type peut être \texttt{x} dans l'instruction "\texttt{return x;}".
+
+\subsubsection{Cas d'un composant}
+Dans le cas où on cherche à renvoyer un composant, on se retrouve confronté à un problème.\\
+L'appelant attend un port requis. Il faut donc renvoyer un port requis que possède le composant. Or on ne peut pas déterminer quel port choisir automatiquement car il peut exister des composants sans port requis externe.\\
+Il n'est donc pas possible de renvoyer un composant.
+
+\subsubsection{Cas d'un port fourni}
+Dans le cas où on cherche à renvoyer un port fourni, l'appelant attend un port requis. Il est donc nécessaire de faire une instruction implicite supplémentaire. \\
+On propose de connecter le port fourni à renvoyer à un nouveau port requis sans nom, possédé par aucun composant. C'est ce port requis \textbf{anonyme} qui serait reçu par l'appelant.\\
+Cette solution peut donc fonctionner mais reste complexe.\\
+On peut aussi supposer que dans le cas où on écrit "\texttt{return <portRequis>;}", on renvoie en réalité le port fourni au port requis spécifié. Cela permet de renvoyer tout port fourni connecté à un port requis (ou à un retour d'opération).\\
+Dans le cas où on stocke la valeur retournée par une opération, on obtient le cas représenté par la figure~\ref{renvoiFourni}.\\
+\begin{figure}[H]
+\centering
+\includegraphics[scale=0.7, keepaspectratio=true]{renvoiFourni.png}
+\caption{Cas de renvoi d'un port fourni connecté à un port requis}
+\label{renvoiFourni}
+\end{figure}
+Lors de l'exécution de "\texttt{return value}" dans \texttt{getValue()}, l'interpréteur crée un port requis anonyme (sans nom et attaché à aucun composant) connecté à \texttt{fC} et le renvoie à \texttt{A} (connexion bleue). L'instruction de \texttt{exec()} consiste alors en une connexion requis-requis, donc une délégation de \texttt{result} vers le port anonyme (délégation rouge).\\
+On peut réduire le nombre de connexions en la simplifiant par une seule connexion entre \texttt{result} et \texttt{fC} (connexion violette). Pour cela il faut modifier l'implémentation de l'opération \texttt{connect} dans les ports requis dans le cas où on cherche à créer une délégation vers un port requis anonyme.\\
+Ce cas de figure est équivalent au cas expliqué dans la section~\ref{passageFourni}. En effet on a les propriétés présentes dans les connexions classiques.\\
+Cette solution est très similaire au retour de méthode en Java.
+
+\subsubsection{Cas d'un port requis}
+Nous avons vu que le retour d'une opération était un port requis pour l'appelant. La solution la plus simple est donc de pouvoir renvoyer un port requis côté receveur courant.\\
+Ainsi contrairement au cas précédent, on n'a plus besoin de passer par un port requis anonyme puisqu'on renvoie un port requis.\\
+Si on reprend l'exemple proposé dans le cas précédent avec un retour par port requis, on obtient la figure~\ref{renvoiRequis}.\\
+\begin{figure}[H]
+\centering
+\includegraphics[scale=0.7, keepaspectratio=true]{renvoiRequis.png}
+\caption{Cas de renvoi d'un port requis connecté à un port requis}
+\label{renvoiRequis}
+\end{figure}
+On remarque que la connexion entre \texttt{result} et \texttt{fC} est similaire, et donc possède les mêmes propriétés, que celle présente dans la section~\ref{passageRequis}. En effet la délégation permet d'obtenir les mêmes propriétés.\\
+Cette solution pose un problème. Car c'est \texttt{B} qui choisit ce qu'il renvoie. Il peut donc modifier la connexion impliquant \texttt{value}, qui modifiera par la délégation la connexion de \texttt{result}. Or \texttt{B} ne doit pas pouvoir anticiper comment il sera utilisé. Il y a donc une contradiction.\\
+C'est pourquoi nous pensons que ce mode de connexion n'est pas utilisable.
+
+\subsubsection{Renvoyer un port fourni}
+D'après les paragraphes précédents, on peut dire qu'il est préférable de renvoyer un port fourni. Celui-ci sera alors connecté à un port requis anonyme et passé à l'appelant.
+
+Il peut être intéressant pour des questions de performances d'éviter les délégations d'un port requis vers un port anonyme. Lorsqu'un cas pareil se présente (voir exemples~\ref{renvoiFourni} et~\ref{renvoiRequis}), la connexion est effectuée entre le port requis et le port fourni connecté au port anonyme. Ce dernier est ensuite détruit.
+
+\subsection{Cas particulier : l'opération new()}
+Afin de créer une nouvelle instance de composant, on invoque l'opération \texttt{new} sur son descripteur.\\
+D'après ce que nous avons dit précédemment, \texttt{new()} renvoie un port requis anonyme connecté à un port fourni du composant nouvellement créé. Ce port fourni est \texttt{default}.
+Ce port anonyme possède les mêmes propriétés qu'un port requis nommé. Il peut, par exemple, servir comme tout autre port à identifier le composant auquel il est connecté. Cela est notamment nécessaire pour connecter un port fourni spécifique d'un nouveau composant à un de ses ports requis. Par exemple : \\
+"\texttt{connect monPortRequis to portFourniCible@(DescripteurCible.new());}"
+
+\section{Les services et l'encapsulation}
+
+\chapter{Nos contributions au langage COMPO}
+
+Nous présentons dans ce chapitre une partie de nos contributions.
+
+\section{Détection des littéraux}
+
+Il n'était pas possible de connecter un port directement à un littéral. Nous souhaitons donc rajouter cette possibilité. Cela permet au développeur de facilement connecter un port à un nombre (entier ou à virgule). On peut également se connecter directement à une chaîne de caractère. 
+
+Pour faciliter l'implémentation, nous avons ajouté le mot clef \texttt{rockonnect}. Le littéral \textit{parsé} est connecté au port par l'intermédiaire de la création d'un \texttt{LiteralAtomicPort}, une spécialisation de \texttt{AtomicPort}
+
+\begin{lstlisting}[language=Compo, frame=single, caption=Syntaxe d'une connexion à un littéral]
+rockonnect compteurVal@self to 1;
+rockonnect compteurVal@self to 3.14;
+rockonnect compteurVal@self to 'Hello World';
+\end{lstlisting}
+
+Par la suite, l'objectif est de fusionner le mot clef \texttt{rockonnect} et \texttt{connect}. Nous n'avons pas pu le faire directement car celui-ci implique l'ajout de nouvelles règles.
+
+\section{Implémentation du \texttt{disconnect} }
+
+Le mot cléf \texttt{disconnect} existait déjà dans COMPO mais n'était pas implémenté. Nous avons donc ajouté la logique métier. Celui-ci permet de couper une connexion entre deux ports.
+
+\begin{lstlisting}[language=Compo, frame=single, caption=Syntaxe d'une déconnexion]
+disconnect compteurValSyndicat@self from default@compteurValSyndicat
+\end{lstlisting}
+
+Cet ajout va nous permettre de pouvoir par exemple modifier la valeur d'un compteur.
+
+L'utilisation de ce mot clé est problématique dans la mesure où il nécessaire de savoir si un port est connecté à quelque chose ou pas avant de pouvoir le connecter à un autre composant. 
+
+La suite logique est de faire un \texttt{disconnect} automatique quand on utilise le mot clef \texttt{connect}, dans le cas où le port est déjà connecté à un composant.
+
+\section{Re-connexion automatique}
+
+Nous souhaitons que l'utilisateur puisse modifier une connection
+
+\begin{lstlisting}[language=Compo, frame=single, caption=Syntaxe d'une connexion entre un port et un littéral]
+connect compteurVal@self to foo;
+connect compteurVal@self to bar;
+connect compteurVal@self to baz;
+\end{lstlisting}
+
+Cet enchaînement permet de se connecter au port \texttt{foo}, \texttt{bar}, puis \texttt{baz}. Cet abstraction permet à l'utilisateur de ne pas utiliser le mot clé \texttt{disconnect} entre chaque opération. Celui-ci sera fait automatiquement par COMPO. Nous avons rajouté l'appel au \texttt{disconnect} de manière automatique avant chaque connexion.
+
+\section{Vérification de compatibilité lors des connexions}
+
+Nous avons donc rajouté une vérification des compatibilités de connexions.
+
+\subsubsection{A la compilation}
+
+Quand le développeur fait un \textit{accept}, une erreur lui indique si il a fait une connexion entre deux composants incompatibles.
+
+\begin{lstlisting}[language=Compo, frame=single, caption=Exemple de connection incorrect]
+internally requires {
+    myPort : { foo() };
+}
+
+architecture {
+    connect myPort@self to default@(MyComponent.new());
+}
+\end{lstlisting}
+
+Si \texttt{MyComponent} n'implémente pas de méthode \texttt{foo}, lors du \texttt{accept}, le développeur aura le message d'érreur suivant : 
+
+\begin{lstlisting}[language=Compo, frame=single, caption=Message d'erreur lorsque les interfaces sont incompatibles]
+Incompatible interfaces between myPort@self and default@(MyComponent.new());
+\end{lstlisting}
+
+\subsubsection{A l'éxécution}
+
+Une seconde vérification de comptabilité est faite à l'exécution car il est possible d'effectuer un \texttt{connect} dans un service.
+
+
+\section{Ajout de primitives SmallTalk en COMPO}
+
+COMPO étant basé sur SmallTalk, il peut être intéressant pour un développeur de pouvoir utiliser des primitives.
+Nous avons donc rajouté une syntaxe qui permet d'indiquer à l'analyseur syntaxique que ce qui suit est une primitive SmallTalk. 
+
+\begin{lstlisting}[language=JAVA, frame=single, caption=Syntaxe d'une primitive smalltalk en COMPO]
+<! 
+    a := 1.
+>
+\end{lstlisting}
+
+\section{Retour par port requis ou fourni}
+
+\subsubsection{Par port Requis}
+Nous souhaitons que le développeur puisse chaîner les opérations. Hors, les invocations d'opérations ne peuvent se faire que sur des ports requis. Il faut donc que une opération rende un port requis.
+
+Le code suivant permet de récupérer le composant \texttt{Printer} connecté au compteur et d'invoquer le service \texttt{print()} directement.
+\begin{lstlisting}[language=JAVA, frame=single, caption=Syntaxe d'une primitive smalltalk en COMPO]
+compteur.getPrinter().print('Hello');
+\end{lstlisting}
+
+\subsubsection{Par port Fournis}
+
+
+
+
+\section{Passage d'arguments par fourni ou requis}
+
+\chapter{Conclusion}
+
+\section{Le langage COMPO}
+
+\section{Nos contributions}
+
+\section{Difficultés rencontrées}
+
+\section{Perspectives}
+
+\bibliographystyle{plain}
+
+\bibliography{references}
+
+\begin{appendices}
+\appendixpage
+\noappendicestocpagenum
+\addappheadtotoc
+
+\chapter{Parallèle entre COMPO et JAVA pour une délégation}
+
+\chaptermark{Comparaison COMPO / JAVA}
+
+\label{Annexe A}
+
+Nous allons réaliser en COMPO puis en Java un exemple de délégation. On prend un cameraman, un interviewer et une personne qui est interviewée. Le but est que le cameraman filme en permanence la personne que l'interviewer est en train d'interroger. L'interviewer va donc commencer à discuter avec une \texttt{ExpressivePerson} puis une \texttt{SadPerson}". Le but est que le cameraman et l'interviewer aient toujours le \textit{focus} sur la même personne.
+
+\subsubsection{COMPO}
+\begin{lstlisting}[language=Compo, frame=single, caption=Cameraman]
+Descriptor Cameraman extends Component {
+
+    provides {
+        listen: { listen(txt) };
+    }
+    
+    requires {
+        chat: { chat(txt); };
+    }
+    
+    architecture {
+        connect chat@self to chat@(interviewer.new());
+    }
+    
+    service listen() {
+        Transcript.show('The cameraman is listening... ');
+        Transcript.crShow(chat@self.chat());
+    }
+}
+\end{lstlisting}
+
+\newpage
+
+\begin{lstlisting}[language=Compo, frame=single, caption=Interviewer]
+Descriptor Interviewer extends Component {
+
+    provides {
+        interview: { interview(txt) };
+    }
+    
+    requires {
+        chat: { chat(txt); };
+    }
+    
+    architecture {
+        connect chat@self to chat@(SadPerson.new());
+    }
+    
+    service interview() {
+        Transcript.show('Hello, what do you think? ');
+        Transcript.crShow(chat@self.chat());
+    }
+}
+\end{lstlisting}
+
+\begin{lstlisting}[language=Compo, frame=single, caption=SadPerson]
+Descriptor SadPerson extends Component {
+
+    provides {
+        chat: { chat(txt); };
+    }
+    
+    service chat(txt) {
+        return 'You will fail your life.';
+    }
+}
+\end{lstlisting}
+
+\begin{lstlisting}[language=Compo, frame=single, caption=ExpressivePerson]
+Descriptor ExpressivePerson extends Component {
+
+    provides {
+        chat: { chat(txt); };
+    }
+    
+    service chat(txt) {
+        return 'I am in love with you.';
+    }
+}
+\end{lstlisting}
+
+
+\clearpage
+
+\subsubsection{Java}
+
+\begin{lstlisting}[language=Java, frame=single, caption=IChatty]
+package compo;
+
+public interface IChatty {
+    String chat();
+}
+\end{lstlisting}
+
+\begin{lstlisting}[language=Java, frame=single, caption=SadPerson]
+package compo;
+
+public class SadPerson implements IChatty {
+    @Override
+    public String chat() {
+        return "You will fail your life.";
+    }
+}
+\end{lstlisting}
+
+\begin{lstlisting}[language=Java, frame=single, caption=ExpressivePerson]
+package compo;
+
+public class ExpressivePerson implements IChatty {
+    @Override
+    public String chat() {
+        return "I'm in love with you.";
+    }
+}
+\end{lstlisting}
+
+\begin{lstlisting}[language=Java, frame=single, caption=ChattyPointer]
+package compo;
+
+public class ChattyPointer<T extends IChatty> {
+    private T m_data;
+
+    public T data() {
+        return this.m_data;
+    }
+
+    public void define(T data) {
+        this.m_data = data;
+    }
+}
+\end{lstlisting}
+
+\clearpage
+
+\begin{lstlisting}[language=Java, frame=single, caption=Cameraman]
+package compo;
+
+public class Cameraman {
+    private IChatty chater;
+    private ChattyPointer<IChatty> target;
+
+    public Cameraman() {
+        this.chater = null;
+        this.target = null;
+    }
+
+    public void setChater(IChatty chater) {
+        this.chater = chater;
+    }
+
+    public void setTarget(ChattyPointer<IChatty> target) {
+        this.target = target;
+    }
+
+    public void listen() {
+        System.out.print("The cameraman is listening... ");
+        System.out.println(this.chater.chat());
+    }
+
+    public void smartListen() {
+        System.out.print("The cameraman is listening... ");
+        System.out.println(this.target.data().chat());
+    }
+}
+\end{lstlisting}
+
+\clearpage
+
+\begin{lstlisting}[language=Java, frame=single, caption=Interviewer]
+package compo;
+
+public class Interviewer {
+    private IChatty chater;
+    private ChattyPointer<IChatty> target;
+
+    public Interviewer() {
+        this.chater = null;
+        this.target = new ChattyPointer<IChatty>();
+    }
+
+    public void setChater(IChatty chater) {
+        this.chater = chater;
+    }
+
+    public void setTarget(IChatty chater) {
+        this.target.define(chater);
+    }
+
+    public IChatty getChater() {
+        return this.chater;
+    }
+
+    public ChattyPointer<IChatty> getTarget() {
+        return this.target;
+    }
+
+    public void interview() {
+        System.out.print("Hello, what do you think? ");
+        System.out.println(this.chater.chat());
+    }
+
+    public void smartInterview() {
+        System.out.print("Hello, what do you think? ");
+        System.out.println(this.target.data().chat());
+    }
+}
+\end{lstlisting}
+
+\clearpage
+
+\begin{lstlisting}[language=Java, frame=single, caption=Program]
+package compo;
+
+public class Program {
+    public static void main(String[] args) {
+        IChatty sadPerson = new SadPerson();
+        IChatty expressivePerson = new ExpressivePerson();
+
+        Interviewer interviewer = new Interviewer();
+        Cameraman cameraman = new Cameraman();
+
+        interviewer.setChater(sadPerson);
+        cameraman.setChater(interviewer.getChater());
+
+        interviewer.interview();
+        cameraman.listen();
+
+        interviewer.setChater(expressivePerson);
+
+        interviewer.interview();
+        cameraman.listen();
+
+        System.out.println("Simulation of required");
+        interviewer.setTarget(sadPerson);
+        cameraman.setTarget(interviewer.getTarget());
+
+        interviewer.smartInterview();
+        cameraman.smartListen();
+
+        interviewer.setTarget(expressivePerson);
+
+        interviewer.smartInterview();
+        cameraman.smartListen();
+    }
+}
+\end{lstlisting}
+
+\subsubsection{Explication}
+L'application Java donnera à l'execution dans la console : \begin{lstlisting}[frame=single, caption=output]
+Hello, what do you think? You will fail your life. 
+The cameraman is listening... You will fail your life.
+Hello, what do you think? I'm in love with you. 
+The cameraman is listening... You will fail your life. 
+Simulation of required 
+Hello, what do you think? You will fail your life. 
+The cameraman is listening... You will fail your life. 
+Hello, what do you think? I'm in love with you. 
+The cameraman is listening... I'm in love with you.
+\end{lstlisting}
+On utilise en Java un objet qui va servir à garder le lien sur la personne en interview.
+
+\chapter{Compteur de manifestants en COMPO}
+
+Nous avons implémenté en COMPO un exemple de compteur de manifestants. Celui-ci comporte un composant instance de \texttt{Compteur} qui implémente la logique métier et un composant instance de \texttt{Printer} qui affiche la valeur du compteur. Dans un premier temps on met un compteur de la police, on remplace ensuite ce compteur par celui des syndicats.
+
+\begin{figure}[H]
+\centering
+\includegraphics[scale=0.7, keepaspectratio=true]{program}
+\caption{Schéma du programme extrait de \texttt{Compobrowser2}}
+\label{compteur}
+\end{figure}
+
+\begin{lstlisting}[language=Compo, frame=single, caption=worspace]
+|compteur|
+compteur := Program.new();
+compteur.print();
+compteur.incrementer();
+compteur.print();
+\end{lstlisting}
+
+\begin{lstlisting}[language=Compo, frame=single, caption=output (Avec le \texttt{CompteurPolice})]
+0
+1
+\end{lstlisting}
+
+On remplace le conteur de la police par celui des syndicats. Pour cela, on met en commentaire la ligne 15 et on dé-commente la ligne 16 de \ref{program}. On exécute à nouveau le programme.
+
+\begin{lstlisting}[language=Compo, frame=single, caption=output (Avec le \texttt{CompteurSyndicat})]
+0
+5
+\end{lstlisting}
+
+
+\begin{lstlisting}[language=Compo, frame=single, caption=Compteur.comp, label=program]
+Descriptor Program extends Component
+{
+	provides {
+		default: {
+		 	run();
+			incrementer();
+			print();
+		 };
+	}
+	internally requires {
+		compteur : Compteur;
+		printer: printer;
+	}
+	architecture {
+	    connect compteur@self to default@(CompteurPolice.new());
+		"connect compteur@self to default@(CompteurSyndicat.new());"
+		connect printer@self to default@(Printer.new());
+		connect printer@compteur to printing@printer;
+	}
+	
+	service incrementer() {
+		compteur.incrementer();
+	}
+	
+	service print() {
+		compteur.showResult();
+	}
+}
+\end{lstlisting}
+
+
+\begin{lstlisting}[language=Compo, frame=single, caption=Compteur de la Police]
+Descriptor CompteurPolice extends Component
+{
+	provides {
+		default: {
+			 incrementer(); 
+			 incrementer(val); 
+			 showResult();
+		};
+	}
+	
+	internally requires {
+			compteurVal : SmallInteger;
+	}
+	
+	requires {
+		printer: { print(txt); };
+	}
+	
+	architecture {
+	    rockonnect compteurVal@self to 0;
+	}
+	
+	service incrementer(val) {
+	    | t u |
+	    t := compteurVal.asString().asInteger() + val;
+	    connect compteurVal@self to t;
+	}
+	
+	service incrementer() {
+	    | t u |
+	    t := compteurVal.asString().asInteger() + 1;
+	    connect compteurVal@self to t;
+	}
+	
+	service showResult() {
+		printer.print(compteurVal.value().printString());
+	}
+}
+\end{lstlisting}
+
+\end{appendices}
+\glsaddall
+
+\end{document}
+
+
+
+
