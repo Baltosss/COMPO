@@ -18,9 +18,9 @@
 \usepackage{thmtools}
 
 \addtolength{\topmargin}{-30pt}
-\addtolength{\evensidemargin}{-27pt}
-\addtolength{\oddsidemargin}{-13pt}
-\addtolength{\textwidth}{40pt}
+\addtolength{\evensidemargin}{-50pt}
+\addtolength{\oddsidemargin}{-50pt}
+\addtolength{\textwidth}{100pt}
 \addtolength{\textheight}{50pt}
 \addtolength{\footskip}{12pt}
 \renewcommand{\headsep}{25pt} 
@@ -50,6 +50,7 @@
   breaklines=true,
   breakatwhitespace=true,
   numbers=left,
+  frame = single,
   tabsize=3
 }
 
@@ -60,12 +61,13 @@
 
 \lstdefinelanguage{Compo}
 {keywords={
-connect, delegate, to, architecture, service, provides, requires, internally requires, extends, Descriptor, provides, service, internally, rockonnect, disconnect},%
-sensitive=true,%
-alsoletter={\$},%
-comment=[l]{\#},%
-string=[b]",%
-string=[b]'%
+connect, delegate, to, architecture, service, provides, requires, internally requires, extends, Descriptor, provides, service, internally, rockonnect, disconnect, operation, return},
+sensitive=true,
+alsoletter={\$},
+comment=[l]{\#},
+string=[b]",
+morecomment=[s]{"}{"},
+string=[b]'
 }
 
 
@@ -85,6 +87,7 @@ string=[b]'%
   breaklines=true,
   breakatwhitespace=true,
   numbers=left,
+  frame = single,
   tabsize=3
 }
 
@@ -100,8 +103,6 @@ string=[b]'%
 
 \maketitle
 
-\chapter*{Résumé}
-
 \chapter*{Remerciements}
 
 Nous souhaitons remercier avant tout Monsieur Dony, notre tuteur lors du projet, pour ses très nombreux conseils et son regard critique et exigeant sur notre travail.\\
@@ -116,19 +117,19 @@ Nous remercions également Monsieur Tibermacine, chercheur au LIRMM, pour ses no
 
 \section{Définitions}
 
-\subsubsection{Paradigme composant}
-
 \subsubsection{Composant}
 
-Un composant est un élément du programme.
-
+\textit{"A run-time entity which provides and requires services through ports"} [Définition de composant dans \citep{these}].\\
+Un composant est un élément du programme. Celui-ci sera couplé à d'autres pour former un programme.
 \subsubsection{Port}
 
-\textit{"Un port est un point de connexion (les composants sont connectés par leurs ports) et de communication (les invocations de services sont transmises via les ports)."}[Définition de port dans \citep{articleToRead}]
-
+\textit{"Un port est un point de connexion (les composants sont connectés par leurs ports) et de communication (les invocations de services sont transmises via les ports)."} [Définition de port dans \citep{articleToRead}].\\
+Les composants peuvent communiquer entre eux grâce à des envois de messages via leurs ports.
 
 \subsubsection{Connexion}
-Une connexion représente un lien ou une voie de communication entre deux ports.
+
+\textit{"Describes a binding from one to another port"} [Définition de connexion dans \citep{these}].\\
+Une connexion représente un lien ou une voie de communication entre deux ports. C'est par ce biais que seront effectué les envoies de messages.
 
 \section{Contexte : La réutilisabilité en développement logiciel}
 
@@ -140,11 +141,12 @@ Les différents paradigmes de programmation qui sont majoritairement utilisés d
 
 \subsection{Solution : La programmation orientée composants}
 
-Il existe cependant un paradigme de programmation qui facilite la réutilisation : le paradigme composant. Chaque partie du programme est cloisonnée et ont des tâches précises. Le tout fonctionne par envois de messages. Cette séparation permet donc facilement de récupérer une partie du programme qui nous servira pour un autre.
+Il existe un paradigme de programmation qui facilite la réutilisation : le paradigme composant. Chaque partie du programme est cloisonnée et ont des tâches précises. Le tout fonctionne par envois de messages. Cette séparation permet donc facilement de récupérer une partie du programme qui nous servira pour un autre.
 
 \section{Objectifs : Comprendre et améliorer le langage COMPO}
 
-Il existe très peu de langages actuellement qui permettent de faire de la programmation par composants. Nous avons cependant trouvé le langage COMPO, actuellement à l'état de prototype, et avons décidé de participer à son développement.
+Il existe très peu de langages actuellement permettant de faire de la programmation par composants qui spécifient la logique métier d'un programme. En effet la majorité des langages de programmation de ce type sont des ADL (\textit{Architecture Description Language}). Ils ne décrivent que l'architecture générale d'un programme et utilisent des exécutables écrits dans d'autres langages pour la logique métier (Java, C++, ...).\\ 
+Nous avons cependant trouvé le langage COMPO, actuellement à l'état de prototype, et avons décidé de participer à son développement.
 
 \chapter{Le langage COMPO}
 
@@ -208,6 +210,8 @@ Maintenant que nous avons introduit les concepts de ports, services et descripte
     <Services>
 }
 \end{lstlisting}
+
+\clearpage
 
 \section{Les ports}
 
@@ -303,9 +307,18 @@ L'invocation de service se fait à partir d'un port requis connecté à un port 
 <portRequis>.<service>(<param1>, <param2...>);
 \end{lstlisting}
 
-\newpage
-
 \subsection{Les arguments}
+
+Tous les composants possèdent un port interne nommé \texttt{args}. Lors de l'invocation d'un service, les composants passés en paramètre sont automatiquement connectés au port interne nommé \texttt{args}. Lors de l'exécution du service, l'appelé va automatiquement récupérer le composant concerné au port \texttt{args}.
+
+\begin{figure}[H]
+\centering
+\includegraphics[scale=0.7, keepaspectratio=true]{portargs}
+\caption{Schéma de la présence du port interne \texttt{args}}
+\label{args}
+\end{figure}
+
+
 
 \subsection{Syntaxe générale d'un service}
 
@@ -572,25 +585,79 @@ Ce port anonyme possède les mêmes propriétés qu'un port requis nommé. Il pe
 
 \section{Les services et l'encapsulation}
 
+\subsection{Modification de la connexion entre deux composants distants}
+
+Dans un service, il est actuellement possible de modifier une connexion d'un composant distant au travers d'autre composants.
+Cette utilisation constitue un abus du langage COMPO et ne devrait pas être permit. En effet, cela constitue une infraction au principe d'encapsulation. 
+
+Il est possible pour un composant d'utiliser la couche réflexive pour connaître les composants qui sont connectés à un port et ainsi pouvoir modifier des connexion à l'extérieure de lui-même. 
+
+Sinon, il faut connaître l'architecture du programme, un exemple de cette déconnexion distante est donnée en annexe \ref{deconnexiondistante}.
+
+\subsection{Modification de connexion d'un port externe}
+
+Prenons un compteur simple représenté par la figure \ref{compteursimple}. Ajoutons lui un service \texttt{foo} qui modifie la connexion d'un port externe comme dans \ref{compteurservicefoo}.
+
+\begin{figure}[H]
+\centering
+\includegraphics[scale=0.7, keepaspectratio=true]{compteursimple}
+\caption{Schéma d'un compteur extrait de \texttt{Compobrowser2}}
+\label{compteursimple}
+\end{figure}
+
+\begin{lstlisting}[language=Compo, frame=single, caption=Exemple d'un service dans un composant compteur,label=compteurservicefoo]
+service foo {
+    connect printer@self to default@(MorphPrinter.new());
+}
+\end{lstlisting}
+
+Cet exécution permet de connecter le port requis externe \texttt{printer} à un nouveau \texttt{printer}, dans ce cas un \texttt{Morph printer}
+
+Quand on exécute le programme, le résultat ne sera pas celui attendu car le \texttt{printer} utilisé ne sera pas celui définit par l'architecte lors de la création du programme. En effet, le \texttt{printer} connecté sera modifié lors de l'exécution du service \texttt{foo}.
+
+\textbf{Nous pensons qu'il ne devrait pas être possible pour un composant de modifier une connexion sur un port externe dans un service}
+
+Pour cela, on pourrait interdire l'utilisation du mot clé \texttt{@} dans les services si le port est un port externe.
+
 \chapter{Nos contributions au langage COMPO}
 
 Nous présentons dans ce chapitre une partie de nos contributions.
 
-\section{Détection des littéraux}
+\section{Connexion à des littéraux}
 
 Il n'était pas possible de connecter un port directement à un littéral. Nous souhaitons donc rajouter cette possibilité. Cela permet au développeur de facilement connecter un port à un nombre (entier ou à virgule). On peut également se connecter directement à une chaîne de caractère. 
 
-Pour faciliter l'implémentation, nous avons ajouté le mot clef \texttt{rockonnect}. Le littéral \textit{parsé} est connecté au port par l'intermédiaire de la création d'un \texttt{LiteralAtomicPort}, une spécialisation de \texttt{AtomicPort}
+Pour faciliter l'implémentation, nous avons ajouté de manière temporaire le mot clef \texttt{rockonnect}. Le littéral \textit{parsé} est connecté au port par l'intermédiaire de la création d'un \texttt{LiteralAtomicPort}, une spécialisation de \texttt{AtomicPort}
+
+Par la suite, nous avons fusionner le mot clef \texttt{rockonnect} et \texttt{connect}. Il est donc désormais possible pour un développeur d'utiliser le mot clé \texttt{connect} pour se connecter aux littéraux. Le mot clé \texttt{rockonnect} a depuis été supprimé.
 
 \begin{lstlisting}[language=Compo, frame=single, caption=Syntaxe d'une connexion à un littéral]
-rockonnect compteurVal@self to 1;
-rockonnect compteurVal@self to 3.14;
-rockonnect compteurVal@self to 'Hello World';
+connect compteurVal@self to 1;
+connect compteurVal@self to 3.14;
+connect compteurVal@self to 'Hello World';
 \end{lstlisting}
 
-Par la suite, l'objectif est de fusionner le mot clef \texttt{rockonnect} et \texttt{connect}. Nous n'avons pas pu le faire directement car celui-ci implique l'ajout de nouvelles règles.
+\section{Nouvelle syntaxe d'une connexion}
 
-\section{Implémentation du \texttt{disconnect} }
+A la manière de l'affectation SmallTalk, nous avons implémenté une nouvelle syntaxe de connexion. Nous avons choisi \texttt{>>>} qui peut donc remplacer le traditionnel \texttt{connect to}.
+
+\begin{lstlisting}[language=Compo, frame=single, caption=Comparaison entre l'ancienne et la nouvelle syntaxe d'une connexion]
+"Nouvelle syntaxe"
+compteurVal >>> 1;
+
+"Ancienne syntaxe"
+connect compteurVal@self to 1;
+\end{lstlisting}
+
+Les deux syntaxes sont actuellement valide pour définir une affectation.
+
+
+\section{Enchainement des \texttt{connect} sur un même port}
+
+Il n'était jusqu'à lors pas possible d'enchaîner les connectes sur un même port. Seul le premier \texttt{connect} était prit en compte. Il fallait utiliser entre chaque modification le mot clé \texttt{disconnect}.
+
+
+\subsubsection{Implémentation du \texttt{disconnect}}
 
 Le mot cléf \texttt{disconnect} existait déjà dans COMPO mais n'était pas implémenté. Nous avons donc ajouté la logique métier. Celui-ci permet de couper une connexion entre deux ports.
 
@@ -602,19 +669,17 @@ Cet ajout va nous permettre de pouvoir par exemple modifier la valeur d'un compt
 
 L'utilisation de ce mot clé est problématique dans la mesure où il nécessaire de savoir si un port est connecté à quelque chose ou pas avant de pouvoir le connecter à un autre composant. 
 
-La suite logique est de faire un \texttt{disconnect} automatique quand on utilise le mot clef \texttt{connect}, dans le cas où le port est déjà connecté à un composant.
+\subsubsection{Ajout du \texttt{disconnect} automatique lors d'une connexion}
 
-\section{Re-connexion automatique}
-
-Nous souhaitons que l'utilisateur puisse modifier une connection
+Nous souhaitons que l'utilisateur puisse modifier une connection sans utiliser le mot clé texttt{disconnect}. Nous avons donc rajouté l'appel au \texttt{disconnect} de manière automatique avant chaque connexion.
 
 \begin{lstlisting}[language=Compo, frame=single, caption=Syntaxe d'une connexion entre un port et un littéral]
-connect compteurVal@self to foo;
-connect compteurVal@self to bar;
-connect compteurVal@self to baz;
+connect compteurVal@self to 1;
+connect compteurVal@self to 2;
+connect compteurVal@self to 3;
 \end{lstlisting}
 
-Cet enchaînement permet de se connecter au port \texttt{foo}, \texttt{bar}, puis \texttt{baz}. Cet abstraction permet à l'utilisateur de ne pas utiliser le mot clé \texttt{disconnect} entre chaque opération. Celui-ci sera fait automatiquement par COMPO. Nous avons rajouté l'appel au \texttt{disconnect} de manière automatique avant chaque connexion.
+Cet enchaînement permet de se connecter au port \texttt{1}, \texttt{2}, puis \texttt{3}. Cet abstraction permet à l'utilisateur de ne pas utiliser le mot clé \texttt{disconnect} entre chaque opération. Celui-ci sera fait automatiquement par COMPO. 
 
 \section{Vérification de compatibilité lors des connexions}
 
@@ -640,10 +705,39 @@ Si \texttt{MyComponent} n'implémente pas de méthode \texttt{foo}, lors du \tex
 Incompatible interfaces between myPort@self and default@(MyComponent.new());
 \end{lstlisting}
 
-\subsubsection{A l'éxécution}
+\subsubsection{A l'exécution}
 
 Une seconde vérification de comptabilité est faite à l'exécution car il est possible d'effectuer un \texttt{connect} dans un service.
 
+\clearpage
+
+\begin{lstlisting}[language=Compo, frame=single, caption=Extrait d'un descripteur Compteur]
+Descriptor Compteur extends Component
+{
+	requires {
+		printer: { foo(); };
+	}
+	
+}
+\end{lstlisting}
+
+Le compteur a besoin d'un \texttt{printer} qui posséde une méthode \texttt{foo}.
+
+
+\begin{lstlisting}[language=Compo, frame=single, caption=Service qui lancera une exception lors de son invocation]
+Descriptor Program extends Component
+{
+	service init() {
+		connect printer@self to default@(Printer.new());
+	}
+}
+\end{lstlisting}
+
+L'éxécution de ce service \textit{init} plantera à l'éxécution si \texttt{Printer} ne posséde pas de service \texttt{foo}. L'invocation du service foo aura donc pour conséquence d'arrêter l'exécution et de déclencher l'erreur suivante.
+
+\begin{lstlisting}[language=Compo, frame=single, caption=Message d'erreur lorsque les interfaces sont incompatibles]
+Incompatible interfaces between printer and printing
+\end{lstlisting}
 
 \section{Ajout de primitives SmallTalk en COMPO}
 
@@ -662,26 +756,62 @@ Nous avons donc rajouté une syntaxe qui permet d'indiquer à l'analyseur syntax
 Nous souhaitons que le développeur puisse chaîner les opérations. Hors, les invocations d'opérations ne peuvent se faire que sur des ports requis. Il faut donc que une opération rende un port requis.
 
 Le code suivant permet de récupérer le composant \texttt{Printer} connecté au compteur et d'invoquer le service \texttt{print()} directement.
-\begin{lstlisting}[language=JAVA, frame=single, caption=Syntaxe d'une primitive smalltalk en COMPO]
+\begin{lstlisting}[language=JAVA, frame=single, caption=Syntaxe d'un chaînage d'incocation en COMPO]
 compteur.getPrinter().print('Hello');
 \end{lstlisting}
 
 \subsubsection{Par port Fournis}
+Il peut être intéressant de retourner un port Fournis dans le cas où l'on souhaite réutiliser le résultat d'un service.
 
 
+\begin{lstlisting}[language=COMPO, frame=single, caption=Syntaxe de retour d'un port founis en COMPO]
+service foo() {
+    return 1;
+}
+\end{lstlisting}
 
 
 \section{Passage d'arguments par fourni ou requis}
+
+
+\section{Remplacement du mot clé \texttt{service} par \texttt{operation} }
+
+Lors de discutions avec des non initié au langage COMPO, l'utilisation du mot clé \texttt{service} comporté des ambiguïtés. Pour faciliter la compréhenssion du langage, le mot clé \texttt{service} a été remplacé par le mot clé \texttt{operation}. Ce dernier permet de faire le paralléle plus facilement avec les autres langages.
+
+\begin{lstlisting}[language=COMPO, frame=single, caption=Syntaxe d'une opération en COMPO]
+operation foo() {
+    "TODO"
+}
+\end{lstlisting}
+
+Il est donc possible d'utiliser les deux mots clés dans le langage pour définir un service.
 
 \chapter{Conclusion}
 
 \section{Le langage COMPO}
 
+COMPO est actuellement l'un des seul langage de programmation orienté composant qui soit réflexif. Cette spécificité qui nous a améner à étudier son fonctionnement.
+
+
 \section{Nos contributions}
+
+Nous avons souhaité contribué au langage COMPO pour améliorer ça syntaxe, mais également ses possibilités.
 
 \section{Difficultés rencontrées}
 
 \section{Perspectives}
+
+Notre problématique étant complexe, la solution qui y répond est complexe aussi. Notre étude nous a permis de comprendre les difficultés en question. Ainsi, les perspectives d’avenir de notre projet sont multiples et variées.
+
+\subsubsection{Augmenter la vérification de compatibilité}
+
+\subsubsection{Implémenter la connexion partagée}
+
+\subsubsection{Implémenter les opérations de la couche réflexive}
+
+\subsubsection{Interdire l'accès à un port distant auquel on n'est pas connecté}
+
+\subsubsection{Extraire COMPO de Pharo}
 
 \bibliographystyle{plain}
 
@@ -713,7 +843,7 @@ Descriptor Cameraman extends Component {
     }
     
     architecture {
-        connect chat@self to chat@(interviewer.new());
+        connect chat@self to chat@(Interviewer.new());
     }
     
     service listen() {
@@ -961,8 +1091,10 @@ Nous avons implémenté en COMPO un exemple de compteur de manifestants. Celui-c
 \centering
 \includegraphics[scale=0.7, keepaspectratio=true]{program}
 \caption{Schéma du programme extrait de \texttt{Compobrowser2}}
-\label{compteur}
+\label{compteurmanifestant}
 \end{figure}
+
+\newpage
 
 \begin{lstlisting}[language=Compo, frame=single, caption=worspace]
 |compteur|
@@ -985,12 +1117,11 @@ On remplace le conteur de la police par celui des syndicats. Pour cela, on met e
 \end{lstlisting}
 
 
-\begin{lstlisting}[language=Compo, frame=single, caption=Compteur.comp, label=program]
+\begin{lstlisting}[language=Compo, frame=single, caption=Programme utilisant un compteur, label=program]
 Descriptor Program extends Component
 {
 	provides {
 		default: {
-		 	run();
 			incrementer();
 			print();
 		 };
@@ -1000,10 +1131,10 @@ Descriptor Program extends Component
 		printer: printer;
 	}
 	architecture {
-	    connect compteur@self to default@(CompteurPolice.new());
-		"connect compteur@self to default@(CompteurSyndicat.new());"
-		connect printer@self to default@(Printer.new());
-		connect printer@compteur to printing@printer;
+        connect compteur@self to default@(CompteurPolice.new());
+	    "connect compteur@self to default@(CompteurSyndicat.new());"
+        connect printer@self to default@(Printer.new());
+        connect printer@compteur to printing@printer;
 	}
 	
 	service incrementer() {
@@ -1016,7 +1147,7 @@ Descriptor Program extends Component
 }
 \end{lstlisting}
 
-
+\newpage
 \begin{lstlisting}[language=Compo, frame=single, caption=Compteur de la Police]
 Descriptor CompteurPolice extends Component
 {
@@ -1037,7 +1168,7 @@ Descriptor CompteurPolice extends Component
 	}
 	
 	architecture {
-	    rockonnect compteurVal@self to 0;
+	    connect compteurVal@self to 0;
 	}
 	
 	service incrementer(val) {
@@ -1058,11 +1189,134 @@ Descriptor CompteurPolice extends Component
 }
 \end{lstlisting}
 
+\chapter{Exemple de suppression d'une connexion distante}
+
+\chaptermark{Suppression d'une connexion distante}
+
+\label{deconnexiondistante}
+
+Dans cet exemple, on prend 3 composants. \texttt{A} est relié à \texttt{B} qui est relié à \texttt{C}. Ces 3 composants sont inclus dans un composant programme nommé \texttt{ABC} dont la représentation est donnée en \ref{abc}. Le but de cet exemple est de montrer qu'un service de \texttt{A} peut couper la connexion entre \texttt{B} et \texttt{C}. Pour cela, on utilise une fonction \texttt{fooA} dans \texttt{A} qui va couper la connexion entre \texttt{B} et \texttt{C}. On met également une méthode \texttt{barA} dans \texttt{A} qui appel une méthode \texttt{barB} dans \texttt{B} qui appel une méthode \texttt{barC} dans \texttt{C} qui affiche \textit{Hello} dans le \texttt{Transcript}.
+
+\begin{figure}[H]
+\centering
+\includegraphics[scale=0.55, keepaspectratio=true]{abc}
+\caption{Schéma du programme extrait de \texttt{Compobrowser2}}
+\label{abc}
+\end{figure}
+
+\begin{lstlisting}[language=Java, frame=single, caption=Workspace]
+| prog |
+prog := ABC.new();
+prog.bar(); "Affiche Hello dans le Transcript"
+prog.foo(); "Supprime la connexion entre B et C"
+prog.bar(); "Provoque une erreur" 
+\end{lstlisting}
+
+L'invocation du service \texttt{bar} ligne 5 lancera exception \ref{exceptionnotconnected} car foo aura coupé la connexion.
+
+
+\begin{lstlisting}[language=Java, frame=single, caption=Erreur lors de l'éxécution du 2e bar(),label=exceptionnotconnected]
+Port is not connected
+\end{lstlisting}
+
+
+
+
+\begin{lstlisting}[language=Compo, frame=single, caption=Exemple d'une deconnexion à distance]
+Descriptor ABC extends Component
+{
+	provides {
+		default: { foo(); bar(); };
+	}
+	
+	internally requires {
+		a : A;
+		b : B;
+		c : C;
+	}
+	
+	architecture {
+		connect a@self to default@(A.new());
+		connect b@self to default@(B.new());
+		connect c@self to default@(C.new());
+		
+		connect b@a to default@b;
+		connect c@b to default@c;
+	
+	}
+	
+	service foo (){
+		a.fooA();
+	}
+	
+	service bar() {
+		a.barA();
+	}
+}
+\end{lstlisting}
+
+
+
+\clearpage
+
+\begin{lstlisting}[language=Compo, frame=single, caption=Programme A]
+Descriptor A extends Component
+{
+	provides {
+		default: {
+			fooA();	barA();
+		 };
+	}
+	
+	requires {
+		b : B;
+	}
+	
+	service fooA() {
+		disconnect c@(b@self) from default@(c@(b@self));
+	}
+	
+	service barA() {
+		b.barB();
+	}
+}
+\end{lstlisting}
+
+
+\begin{lstlisting}[language=Compo, frame=single, caption=Programme B]
+Descriptor B extends Component
+{
+	provides {
+		default: { barB(); };
+	}
+	
+	requires {
+		c : C;
+	}
+	
+	service barB() {
+		c.barC();
+	}
+}
+\end{lstlisting}
+
+\begin{lstlisting}[language=Compo, frame=single, caption=Programme C]
+Descriptor C extends Component
+{
+	provides {
+		default: { barC(); };
+	}
+	
+	service barC(){
+		<!	"Primitive SmallTalk"
+		    Transcript crShow: 'Hello'.	 > 
+	}
+}
+\end{lstlisting}
+
+
+
 \end{appendices}
 \glsaddall
 
 \end{document}
-
-
-
-
