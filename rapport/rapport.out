@@ -1,0 +1,61 @@
+\BOOKMARK [0][-]{chapter.1}{Introduction}{}% 1
+\BOOKMARK [1][-]{section.1.1}{D\351finitions}{chapter.1}% 2
+\BOOKMARK [1][-]{section.1.2}{Contexte : La r\351utilisabilit\351 en d\351veloppement logiciel}{chapter.1}% 3
+\BOOKMARK [2][-]{subsection.1.2.1}{Comment d\351velopper un programme pour que ses \351l\351ments soit r\351utilisables?}{section.1.2}% 4
+\BOOKMARK [2][-]{subsection.1.2.2}{Solution : La programmation orient\351e composants}{section.1.2}% 5
+\BOOKMARK [1][-]{section.1.3}{Objectifs : Comprendre et am\351liorer le langage COMPO}{chapter.1}% 6
+\BOOKMARK [0][-]{chapter.2}{Le langage COMPO}{}% 7
+\BOOKMARK [1][-]{section.2.1}{Les descripteurs de composants}{chapter.2}% 8
+\BOOKMARK [2][-]{subsection.2.1.1}{Les informations pr\351sentes dans un descripteur}{section.2.1}% 9
+\BOOKMARK [2][-]{subsection.2.1.2}{Instanciation d'un composant}{section.2.1}% 10
+\BOOKMARK [2][-]{subsection.2.1.3}{Exemple de syntaxe d'un descripteur en COMPO}{section.2.1}% 11
+\BOOKMARK [1][-]{section.2.2}{Les ports}{chapter.2}% 12
+\BOOKMARK [2][-]{subsection.2.2.1}{R\364le}{section.2.2}% 13
+\BOOKMARK [2][-]{subsection.2.2.2}{Visibilit\351}{section.2.2}% 14
+\BOOKMARK [2][-]{subsection.2.2.3}{Cardinalit\351}{section.2.2}% 15
+\BOOKMARK [2][-]{subsection.2.2.4}{Les ports par d\351fauts}{section.2.2}% 16
+\BOOKMARK [2][-]{subsection.2.2.5}{Syntaxe g\351n\351rale de d\351finition d'un port}{section.2.2}% 17
+\BOOKMARK [1][-]{section.2.3}{Les connexions}{chapter.2}% 18
+\BOOKMARK [2][-]{subsection.2.3.1}{Standard : requis-fourni}{section.2.3}% 19
+\BOOKMARK [2][-]{subsection.2.3.2}{D\351l\351gation : requis-requis ou fourni-fourni}{section.2.3}% 20
+\BOOKMARK [1][-]{section.2.4}{Architecture interne}{chapter.2}% 21
+\BOOKMARK [1][-]{section.2.5}{Les services}{chapter.2}% 22
+\BOOKMARK [2][-]{subsection.2.5.1}{L'invocation}{section.2.5}% 23
+\BOOKMARK [2][-]{subsection.2.5.2}{Les arguments}{section.2.5}% 24
+\BOOKMARK [2][-]{subsection.2.5.3}{Syntaxe g\351n\351rale d'un service}{section.2.5}% 25
+\BOOKMARK [0][-]{chapter.3}{R\351flexion sur les am\351liorations possibles de COMPO}{}% 26
+\BOOKMARK [1][-]{section.3.1}{Analyse des connexions}{chapter.3}% 27
+\BOOKMARK [2][-]{subsection.3.1.1}{Connexion standard}{section.3.1}% 28
+\BOOKMARK [2][-]{subsection.3.1.2}{D\351l\351gation}{section.3.1}% 29
+\BOOKMARK [2][-]{subsection.3.1.3}{Connexion partag\351e : \173requis\175-fourni}{section.3.1}% 30
+\BOOKMARK [2][-]{subsection.3.1.4}{Conclusion}{section.3.1}% 31
+\BOOKMARK [1][-]{section.3.2}{Passage d'arguments}{chapter.3}% 32
+\BOOKMARK [2][-]{subsection.3.2.1}{Par composant}{section.3.2}% 33
+\BOOKMARK [2][-]{subsection.3.2.2}{Par port fourni}{section.3.2}% 34
+\BOOKMARK [2][-]{subsection.3.2.3}{Par port requis}{section.3.2}% 35
+\BOOKMARK [2][-]{subsection.3.2.4}{Qui choisit le mode de passage ?}{section.3.2}% 36
+\BOOKMARK [2][-]{subsection.3.2.5}{Cons\351quence : Il faut les deux modes de passages}{section.3.2}% 37
+\BOOKMARK [1][-]{section.3.3}{Type de retour d'op\351ration}{chapter.3}% 38
+\BOOKMARK [2][-]{subsection.3.3.1}{Du point de vu de l'appelant}{section.3.3}% 39
+\BOOKMARK [2][-]{subsection.3.3.2}{Du point de vu du receveur courant}{section.3.3}% 40
+\BOOKMARK [2][-]{subsection.3.3.3}{Cas particulier : l'op\351ration new\(\)}{section.3.3}% 41
+\BOOKMARK [1][-]{section.3.4}{Les services et l'encapsulation}{chapter.3}% 42
+\BOOKMARK [2][-]{subsection.3.4.1}{Modification de la connexion entre deux composants distants}{section.3.4}% 43
+\BOOKMARK [2][-]{subsection.3.4.2}{Modification de connexion d'un port externe}{section.3.4}% 44
+\BOOKMARK [0][-]{chapter.4}{Nos contributions au langage COMPO}{}% 45
+\BOOKMARK [1][-]{section.4.1}{Connexion \340 des litt\351raux}{chapter.4}% 46
+\BOOKMARK [1][-]{section.4.2}{Nouvelle syntaxe d'une connexion}{chapter.4}% 47
+\BOOKMARK [1][-]{section.4.3}{Enchainement des connect sur un m\352me port}{chapter.4}% 48
+\BOOKMARK [1][-]{section.4.4}{V\351rification de compatibilit\351 lors des connexions}{chapter.4}% 49
+\BOOKMARK [1][-]{section.4.5}{Ajout de primitives SmallTalk en COMPO}{chapter.4}% 50
+\BOOKMARK [1][-]{section.4.6}{Retour par port requis ou fourni}{chapter.4}% 51
+\BOOKMARK [1][-]{section.4.7}{Passage d'arguments par fourni ou requis}{chapter.4}% 52
+\BOOKMARK [1][-]{section.4.8}{Remplacement du mot cl\351 service par operation }{chapter.4}% 53
+\BOOKMARK [0][-]{chapter.5}{Conclusion}{}% 54
+\BOOKMARK [1][-]{section.5.1}{Le langage COMPO}{chapter.5}% 55
+\BOOKMARK [1][-]{section.5.2}{Nos contributions}{chapter.5}% 56
+\BOOKMARK [1][-]{section.5.3}{Difficult\351s rencontr\351es}{chapter.5}% 57
+\BOOKMARK [1][-]{section.5.4}{Perspectives}{chapter.5}% 58
+\BOOKMARK [0][-]{Annexe.1.A}{Annexe Parall\350le entre COMPO et JAVA pour une d\351l\351gation}{}% 59
+\BOOKMARK [0][-]{Annexe.1.B}{Annexe Compteur de manifestants en COMPO}{}% 60
+\BOOKMARK [0][-]{Annexe.1.C}{Annexe Exemple de suppression d'une connexion distante}{}% 61
