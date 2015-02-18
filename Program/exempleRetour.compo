@@ -1,0 +1,82 @@
+Descriptor ExempleRetour extends Component
+{
+}
+
+Descriptor CompteurRetour extends ExempleRetour
+{
+	provides {
+		default: {incrementer(); decrementer(); getCompteurVal(); getCompteurValReq(); };
+	}
+	internally requires {
+		compteurVal: *;
+	}
+	architecture {
+	    compteurVal >>> 1;
+	}
+	operation getCompteurVal() {
+		return compteurVal;
+	}
+	operation getCompteurValReq() :req {
+		return compteurVal;
+	}
+	operation incrementer() {
+	    | t |
+	    t := compteurVal.asString().asInteger() + 1;
+	    compteurVal >>> t;
+	}
+	operation decrementer() {
+		| t |
+		t := compteurVal.asString().asInteger() - 1;
+		connect compteurVal@self to t;
+	}
+}
+
+Descriptor SuiveurRetour extends ExempleRetour
+{
+	provides {
+		default: {getCompteurVal(); setCompteurVal(cptVal);};
+	}
+	requires {
+		compteurVal: SmallInteger;
+	}
+	operation getCompteurVal() {
+		return compteurVal;
+	}
+	operation setCompteurVal(cptVal) {
+		compteurVal >>> cptVal;
+	}
+}
+
+Descriptor ProgramRetour extends ExempleRetour
+{
+	provides {
+		default: {main();};
+	}
+	internally requires {
+		compteur : {incrementer();decrementer();getCompteurVal();getCompteurValReq();};
+		suiveur: {getCompteurVal(); setCompteurVal(cpt);};
+	}
+	architecture {
+		compteur >>> default@(CompteurRetour.new());
+		suiveur >>> default@(SuiveurRetour.new());
+	}
+	operation main() {
+		Transcript.crShow('Exemple avec retour classique');
+		suiveur.setCompteurVal(compteur.getCompteurVal());
+		self.print();
+		compteur.incrementer();
+		self.print();
+		compteur.decrementer();
+		Transcript.crShow('Exemple avec retour par requis');
+		suiveur.setCompteurVal(compteur.getCompteurValReq());
+		self.print();
+		compteur.incrementer();
+		self.print();
+	}
+	operation print() {
+		Transcript.crShow(compteur.getCompteurVal().asString());
+		Transcript.crShow(suiveur.getCompteurVal().asString());
+	}
+}
+
+
