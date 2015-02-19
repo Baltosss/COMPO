@@ -1,0 +1,73 @@
+Descriptor PassageArgumentExample extends Component
+{
+}
+
+Descriptor A extends PassageArgumentExample
+{
+	provides {
+		default : { runProv(); runReq(); print();};
+	}
+	requires {
+		value : SmallInteger;
+		b : B;
+	}
+	operation runProv() {
+		b.setValue(value);	
+		(default@self).print();
+		b.print();
+		value >>> 2;
+		(default@self).print();
+		b.print();
+	}
+	operation runReq() {
+		b.setValue(!value);
+		(default@self).print();
+		b.print();
+		value >>> 2;
+		(default@self).print();
+		b.print();
+	}
+	operation print() {
+		Transcript.crShow(value);
+	}
+}
+
+Descriptor B extends PassageArgumentExample
+{
+	provides {
+		default : { setValue(v); print();};
+	} 
+	requires {
+		value: SmallInteger;
+	}
+	operation setValue(v) {
+		value >>> v;
+	}
+	operation print() {
+		Transcript.crShow(value.asString());
+	}
+}
+
+Descriptor PassageProgram extends PassageArgumentExample
+{
+	provides {
+		default : { main();};
+	} 
+	internally requires {
+		a: A;
+		b: B;
+	}
+	architecture {
+		a >>> default@(A.new());
+		b >>> default@(B.new());
+		b@a >>> default@b;
+		value@a >>> 1;
+	}
+	operation main() {
+		Transcript.crShow('Test de passage de port fourni');
+		a.runProv();
+		value@a >>> 1;
+		Transcript.crShow('Test de passage de port fourni');
+		a.runReq();
+	}
+}
