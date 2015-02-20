@@ -24,6 +24,7 @@
 \addtolength{\textheight}{50pt}
 \addtolength{\footskip}{12pt}
 \renewcommand{\headsep}{25pt} 
+\usepackage[utf8]{inputenc}
 
 \definecolor{dkgreen}{rgb}{0,0.6,0}
 \definecolor{gray}{rgb}{0.5,0.5,0.5}
@@ -344,6 +345,7 @@ Elle s'apparente aux passages d'arguments Java. A savoir : le composant passé e
 Elle n'existe pas de façon non-programmatique en Java, mais son comportement peux être simulé par la création d'un objet intermédiaire. De même en C++, le problème n'est pas implémentée de façon non-programmatique. En effet, pour simuler cette connexion, il faudrait simuler un passage de pointeur \textit{immutable}, qui contiendrait une référence vers l'objet C. Un exemple est donné en annexe \ref{Annexe A} avec une implémentions en Java.
 
 \subsection{Connexion partagée : \{requis\}-fourni}
+\label{connexionPartageeRef}
 Une connexion \{requis\}-fourni consiste à connecter un ensemble de ports requis à un port fourni.\\ 
 Si un des ports requis modifie la connexion, alors les autres ports requis seront modifiés de la même manière.\\
 Contrairement à la délégation, tout les ports peuvent modifier cette connexion. La figure~\ref{connexionPartagee} illustre l'idée proposée.
@@ -586,7 +588,7 @@ Ce port anonyme possède les mêmes propriétés qu'un port requis nommé. Il pe
 \section{Les services et l'encapsulation}
 
 \subsection{Modification de la connexion entre deux composants distants}
-
+\label{serviceEncapsulationRef}
 Dans un service, il est actuellement possible de modifier une connexion d'un composant distant au travers d'autre composants.
 Cette utilisation constitue un abus du langage COMPO et ne devrait pas être permit. En effet, cela constitue une infraction au principe d'encapsulation. 
 
@@ -611,13 +613,56 @@ service foo {
 }
 \end{lstlisting}
 
-Cet exécution permet de connecter le port requis externe \texttt{printer} à un nouveau \texttt{printer}, dans ce cas un \texttt{Morph printer}
+Cet exécution permet de connecter le port requis externe \texttt{printer} à un nouveau \texttt{printer}, dans ce cas un \texttt{MorphPrinter}
 
 Quand on exécute le programme, le résultat ne sera pas celui attendu car le \texttt{printer} utilisé ne sera pas celui définit par l'architecte lors de la création du programme. En effet, le \texttt{printer} connecté sera modifié lors de l'exécution du service \texttt{foo}.
 
 \textbf{Nous pensons qu'il ne devrait pas être possible pour un composant de modifier une connexion sur un port externe dans un service}
 
 Pour cela, on pourrait interdire l'utilisation du mot clé \texttt{@} dans les services si le port est un port externe.
+
+\section{Le typage en COMPO}
+Actuellement, COMPO est un langage à typage dynamique. On ne voit qu'à l'exécution si un problème survient. Il peut être intéressant de voir les points forts et points faibles des typages possibles en COMPO afin d'en préconiser celui que nous estimerons le plus intéressant.
+
+\subsection{Le typage dynamique}
+Le typage dynamique permet de programmer rapidement avec une syntaxe minimale des programmes complexes.\\
+Dans COMPO ces points forts sont : 
+\begin{itemize}
+\item Syntaxe minimale : ne pas préciser les types pour les variables ou les signatures d'opérations permet de garder une syntaxe minimale et lisible.
+\item Retrait des problèmes du polymorphisme : grâce au typage dynamique, il est possible de connecter un port requis à un port fourni peu importe d'où il vient.
+\end{itemize}
+
+Néanmoins les inconvénients sont similaires à ceux que l'on peut retrouver en langage à objets à typage dynamique : 
+\begin{itemize}
+\item Code peu lisible : l'absence de typage implique qu'il est difficile de reprendre un code créé par une autre personne. Il est difficile de savoir quel type d'argument est demandé par une opération par exemple.
+\item Vérification de la cohérence du code à l'exécution : on ne peut anticiper les erreurs liées au typage à la compilation. On est obligé de faire des tests afin de vérifier que le code est cohérent.
+\end{itemize}
+
+\subsection{Le typage statique}
+Le typage statique propose des codes plus complexes mais aussi plus précis.\\
+L'utilisation du typage statique en COMPO permettrait de : 
+\begin{itemize}
+\item Vérification de la cohérence du code à la compilation : le typage statique permettrait de vérifier à la compilation d'un descripteur si les connexions sont cohérentes par exemple.
+\item Signatures d'opérations plus lisibles : ajouter des types aux arguments et au retour des opérations permettrait d'expliciter ce qu'attend l'opération pour fonctionner.
+\end{itemize}
+
+Cependant cette solution possède des inconvénients : 
+\begin{itemize}
+\item Typage très contraignant sur l'origine des composants : le fait de typer statiquement les arguments ou les ports restreint l'origine des composants. En effet en typage statique il faut que le type d'une variable et ce qu'elle contient possède une relation d'héritage (polymorphisme). Cette relation d'héritage implique qu'il est difficile de mettre en relation des composants d'origines diverses.
+\item Code plus lourd : COMPO cherche à rester minimaliste et l'ajout du typage statique rendrait la syntaxe beaucoup plus lourde (surtout sur les signatures d'opérations).
+\end{itemize}
+
+\subsection{Notre solution : le typage par interface}
+Nous proposons une solution mariant les avantages du typage statique et du typage dynamique sans leurs inconvénients.\\
+Il s'agit de typer les arguments d'opérations par une liste d'opérations comme pour les ports. On peut retrouver ce type de vérification de compatibilité dans certains ADL comme DEDAL~\citep{dedal}.\\
+On obtiendrait ainsi : 
+\begin{itemize}
+\item Un code lisible pour les opérations : l'ajout de ce typage permet de mieux comprendre ce dont a besoin l'opération pour fonctionner.
+\item Une vérification de la cohérence du code à la compilation : il est possible de vérifier la compatibilité des connexions et des passages d'arguments à la compilation en comparant les interfaces (anonymes ou nommées).
+\item Retrait des problèmes liés au polymorphisme : il n'y a plus de problème lié aux relations d'héritage dans le typage par interface puisqu'on compare la liste des signatures d'opérations.
+\end{itemize}
+
+La syntaxe utilisant un tel mode de typage serait un peu plus lourde (interface sur les arguments d'opérations) mais resterait tout de même assez sobre.
 
 \chapter{Nos contributions au langage COMPO}
 
@@ -639,7 +684,7 @@ connect compteurVal@self to 'Hello World';
 
 \section{Nouvelle syntaxe d'une connexion}
 
-A la manière de l'affectation SmallTalk, nous avons implémenté une nouvelle syntaxe de connexion. Nous avons choisi \texttt{>>>} qui peut donc remplacer le traditionnel \texttt{connect to}.
+A la manière de l'affectation SmallTalk, nous avons implémenté une nouvelle syntaxe de connexion. Nous avons choisi $>>>$ qui peut donc remplacer le traditionnel \texttt{connect to}. Cette syntaxe moins verbeuse permet également de s'abstraire du \texttt{@self}.
 
 \begin{lstlisting}[language=Compo, frame=single, caption=Comparaison entre l'ancienne et la nouvelle syntaxe d'une connexion]
 "Nouvelle syntaxe"
@@ -746,7 +791,7 @@ Nous avons donc rajouté une syntaxe qui permet d'indiquer à l'analyseur syntax
 
 \begin{lstlisting}[language=JAVA, frame=single, caption=Syntaxe d'une primitive smalltalk en COMPO]
 <! 
-    a := 1.
+    Transcript crShow: 'Hello'.
 >
 \end{lstlisting}
 
@@ -760,6 +805,17 @@ Le code suivant permet de récupérer le composant \texttt{Printer} connecté au
 compteur.getPrinter().print('Hello');
 \end{lstlisting}
 
+
+
+\begin{lstlisting}[language=COMPO, frame=single, caption=Syntaxe de retour d'un port requis en COMPO]
+service foo() {
+    return !portInterne;
+}
+\end{lstlisting}
+
+Cette syntaxe permet de retourne un port requis directement.
+
+
 \subsubsection{Par port Fournis}
 Il peut être intéressant de retourner un port Fournis dans le cas où l'on souhaite réutiliser le résultat d'un service.
 
@@ -769,6 +825,8 @@ service foo() {
     return 1;
 }
 \end{lstlisting}
+
+Lors de la définition d'un service, un composant peut choisir de retourner directement un port requis.
 
 
 \section{Passage d'arguments par fourni ou requis}
@@ -790,7 +848,7 @@ Il est donc possible d'utiliser les deux mots clés dans le langage pour défini
 
 \section{Le langage COMPO}
 
-COMPO est actuellement l'un des seul langage de programmation orienté composant qui soit réflexif. Cette spécificité qui nous a améner à étudier son fonctionnement.
+COMPO est actuellement l'un des seul langage de programmation orienté composant qui soit réflexif. Cette spécificité qui nous a amené à étudier son fonctionnement.
 
 
 \section{Nos contributions}
@@ -799,19 +857,43 @@ Nous avons souhaité contribué au langage COMPO pour améliorer ça syntaxe, ma
 
 \section{Difficultés rencontrées}
 
+\subsubsection{Le code généré}
+
+Une partie du langage COMPO est basé sur du code généré. Lors de nos ajouts, cette spécificité nous a très vite posée problème. En effet, lorsque l'on fait une modification, le code est à nouveau généré. Or, certaines portions du code généré avait été modifié "à la main" pour effectuer des correctifs. Lorsque nous avons essayé de modifier le code de base, celui généré ne comportait plus les correctifs.
+
+\subsubsection{Le retour par requis}
+Pour renvoyer un port requis dans une opération et non ce à quoi il est connecté, nous avions pensé dans un premier temps à rajouter un opérateur \texttt{:req} dans la signature du service.\\
+Ci-dessous, on suppose que le composant A possède un port requis \texttt{a} connecté à un autre composant. Cet exemple renvoie le port requis \texttt{a} et non ce à quoi il est connecté.
+\begin{lstlisting}[language=COMPO, frame=single, caption=Syntaxe d'une opération avec \texttt{:req} en COMPO]
+operation foo() :req {
+    return a;
+}
+\end{lstlisting}
+On a remarqué que l'ajout du \texttt{!} par la suite posait problème car les deux opérateurs peuvent répondre à la même demande. Nous avons donc modifié \texttt{:req} pour le transformer en une assertion. Si \texttt{foo()} ne retourne pas un port requis, le programme lève une exception.
+
 \section{Perspectives}
 
 Notre problématique étant complexe, la solution qui y répond est complexe aussi. Notre étude nous a permis de comprendre les difficultés en question. Ainsi, les perspectives d’avenir de notre projet sont multiples et variées.
 
 \subsubsection{Augmenter la vérification de compatibilité}
+Actuellement, la vérification de compatibilité ne fonctionne que sur les interfaces anonymes.\\
+Le port \texttt{default} généré sur tous les composants est toujours attribué avec une interface "*". Hors une interface nommée est l'interface du port \texttt{default} du composant de même nom (donc "*").\\
+Il faudrait donc modifier comment est générée l'interface du port \texttt{default} afin de pouvoir avoir une vérification de compatibilité dans tous les cas.
 
 \subsubsection{Implémenter la connexion partagée}
+Nous avons vu dans~\ref{connexionPartageeRef} qu'il pourrait exister un troisième type de connexion : la connexion partagée.\\
+Elle n'est pas implémentée dans COMPO actuellement. On peut la simuler mais il n'y a pas de raccourci syntaxique pour en créer une automatiquement.\\
+L'ajout d'une telle connexion demanderait d'augmenter la syntaxe du \texttt{parseur}, et d'ajouter de nouveaux types de ports requis.
 
 \subsubsection{Implémenter les opérations de la couche réflexive}
+COMPO est un langage réflexif. Cependant les opérations de la couche réflexive ne sont pas toutes implémentées. On effectue actuellement l'introspection directement en SmallTalk en suivant les relations créées par COMPO.\\
+Ces opérations ne poseraient pas de problèmes pour être implémentées grâce au fait qu'on puisse écrire du code SmallTalk directement dans une opération par la syntaxe \texttt{<! ... >}.
 
 \subsubsection{Interdire l'accès à un port distant auquel on n'est pas connecté}
+On a vu dans~\ref{serviceEncapsulationRef} que l'accès à un port distant auquel on n'est pas connecté pouvait poser problème dans une opération. Il peut être intéressant d'interdire ces accès par le mot-clef \texttt{@} et forcer l'utilisation d'opérations servant d'accesseurs.
 
 \subsubsection{Extraire COMPO de Pharo}
+Actuellement, COMPO fonctionne en environnement fermé dans Pharo. Pouvoir s'extraire de cet environnement pourrait permettre une exportation plus simple et une utilisation d'outils externes plus élaborés. Par exemple on pourrait utiliser COMPO dans Eclipse et obtenir toute la puissance d'un tel environnement de développement.
 
 \bibliographystyle{plain}
 
@@ -1128,7 +1210,7 @@ Descriptor Program extends Component
 	}
 	internally requires {
 		compteur : Compteur;
-		printer: printer;
+		printer: Printer;
 	}
 	architecture {
         connect compteur@self to default@(CompteurPolice.new());
@@ -1172,19 +1254,19 @@ Descriptor CompteurPolice extends Component
 	}
 	
 	service incrementer(val) {
-	    | t u |
+	    | t |
 	    t := compteurVal.asString().asInteger() + val;
 	    connect compteurVal@self to t;
 	}
 	
 	service incrementer() {
-	    | t u |
+	    | t |
 	    t := compteurVal.asString().asInteger() + 1;
 	    connect compteurVal@self to t;
 	}
 	
 	service showResult() {
-		printer.print(compteurVal.value().printString());
+		printer.print(compteurVal.asString());
 	}
 }
 \end{lstlisting}
@@ -1314,6 +1396,397 @@ Descriptor C extends Component
 }
 \end{lstlisting}
 
+
+
+
+\chapter{Comparaison entre les deux types de retour en COMPO}
+
+
+Le but de cette exemple est de montrer la différences entre les deux types de retours.
+
+Pour cela, on utilise un compteur classique. Un second composant qui est \texttt{suiveur} possède un port \texttt{compteurVal}. Nous allons montrer que l'on peut synchroniser les deux compteur pour que lorsque l'on incrémente le compteur, le port interne \texttt{compteurVal} du suiveur se met à jour automatiquement.
+
+\begin{figure}[H]
+\centering
+\includegraphics[scale=0.7, keepaspectratio=true]{CompteurSuiveur}
+\caption{Schéma du programme extrait de \texttt{Compobrowser2}}
+\label{compteursuiveur}
+\end{figure}
+
+\clearpage
+
+\begin{lstlisting}[language=Compo, frame=single, caption=Workspace (Retour classique)]
+|prog|
+prog := Program.new();
+prog.init1();
+
+prog.printCompteurs();
+prog.inrementer();
+prog.printCompteurs();
+\end{lstlisting}
+
+
+\begin{lstlisting}[language=Compo, frame=single, caption=Output (Retour classique)]
+compteur : 1
+suiveur : 1
+Increntation du compteur
+compteur : 2
+suiveur : 1
+\end{lstlisting}
+
+
+On remarque que lorsque l'on incrémente le compteur, le suiveur n'est pas modifié. En effet, le suiveur s'est connecté directement sur la valeur que possédé le compteur c'est à dire 1. Lorsque l'on incrémente le compteur est modifié. Cependant le suiveur reste connecté à la valeur que on lui avait donnée, autrement dit 1.
+
+\begin{lstlisting}[language=Compo, frame=single, caption=Output (Retour par requis)]
+|prog|
+prog := Program.new();
+prog.init2();
+
+prog.printCompteurs();
+prog.inrementer();
+prog.printCompteurs();
+\end{lstlisting}
+
+\begin{lstlisting}[language=Compo, frame=single, caption=Output (Retour par requis)]
+compteur : 1
+suiveur : 1
+Incrementation du compteur
+compteur : 2
+suiveur : 2
+\end{lstlisting}
+
+Dans cet exemple, le suiveur est bien modifié car on a connecté la valeur du suiveur directement au port qui contient la valeur du compteur et pas à la valeur comme précédemment.
+
+
+\clearpage
+
+\begin{lstlisting}[language=Compo, frame=single, caption=Le programme]
+Descriptor Program extends Component
+{
+	provides {
+		default: {init1(); init2(); incrementer();};
+	}
+	internally requires {
+		compteur : {incrementer();getCompteurVal();getCompteurValReq();printValue();};
+		suiveur: {getCompteurVal(); setCompteurVal(cpt);printValue();};
+	}
+	architecture {
+	    compteur >>> default@(Compteur.new());
+	    suiveur >>> default@(Suiveur.new());
+	}
+	operation init1() {
+    	suiveur.setCompteurVal(compteur.getCompteurVal());
+	}
+	operation init2() {
+        suiveur.setCompteurVal(compteur.getCompteurValReq());
+	}
+	operation printCompteurs() {
+        compteur.printValue();
+        suiveur.printValue();
+	}
+	operation incrementer(){
+        Transcript.crShow('Incrementation du compteur');
+        compteur.incrementer();
+	}
+}
+\end{lstlisting}
+
+\begin{lstlisting}[language=Compo, frame=single, caption=Programme Suiveur]
+Descriptor Suiveur extends Component
+{
+	provides {
+		default: {getCompteurVal(); setCompteurVal(cptVal);};
+	}
+	
+	requires {
+		compteurVal: SmallInteger;
+	}
+	
+	operation getCompteurVal() {
+		return compteurVal;
+	}
+	operation setCompteurVal(cptVal) {
+		compteurVal >>> cptVal;
+	}
+	operation printValue() {
+	    Transcript.crShow(compteurVal.asString());
+	}
+}
+\end{lstlisting}
+
+\begin{lstlisting}[language=Compo, frame=single, caption=Programme Compteur]
+Descriptor Compteur extends Component
+{
+	provides {
+		default: {incrementer(); getCompteurVal(); getCompteurValReq(); printValue();};
+	}
+	
+	internally requires {
+		compteurVal: SmallInteger;
+	}
+	
+	architecture {
+	    compteurVal >>> 1;
+	}
+	
+	operation getCompteurVal() {
+	    "retourne la valeur connectee"
+		return compteurVal;
+	}
+	
+	operation getCompteurValReq() {
+	    "retourne le port directement"
+		return !compteurVal;
+	}
+	
+	operation incrementer() {
+	    | t |
+	    t := compteurVal.asString().asInteger() + 1;
+	    compteurVal >>> t;
+	}
+	
+	operation printValue() {
+	    Transcript.crShow(compteurVal.asString());
+	}
+}
+\end{lstlisting}
+
+
+\chapter{Comparaison entre les deux types de passages en COMPO}
+
+
+
+
+\begin{figure}[H]
+\centering
+\includegraphics[scale=0.7, keepaspectratio=true]{passagereqprov}
+\caption{Schéma du programme extrait de \texttt{Compobrowser2}}
+\label{compteursuiveur}
+\end{figure}
+
+
+
+\newpage
+
+\begin{lstlisting}[language=Compo, frame=single, caption=Workspace (Passage par Fournis)]
+|prog|
+prog := Program.new();
+prog.initProv();
+
+prog.printValue();
+prog.changeValA();
+prog.printValue();
+\end{lstlisting}
+
+
+\begin{lstlisting}[language=Compo, frame=single, caption=Output]
+A : 1
+B : 1
+
+A : 2
+B : 1
+\end{lstlisting}
+
+\begin{lstlisting}[language=Compo, frame=single, caption=Workspace (Passage par Requis)]
+|prog|
+prog := Program.new();
+prog.initReq();
+
+prog.printValue();
+prog.changeValA();
+prog.printValue();
+\end{lstlisting}
+
+
+\begin{lstlisting}[language=Compo, frame=single, caption=Output]
+A : 1
+B : 1
+
+A : 2
+B : 2
+\end{lstlisting}
+
+\newpage
+
+
+\begin{lstlisting}[language=Compo, frame=single, caption=Composant A]
+Descriptor A extends Component
+{
+	provides {
+		default : { initProv(); initReq(); print(); setValue(val); };
+	}
+	
+	requires {
+		value : SmallInteger;
+		b : B;
+	}
+
+	operation setValue(val){
+	    value >>> val;												
+	}
+	
+	operation initProv() {
+		b.setValue(value);	
+	}																								
+	operation initReq() {
+		b.setValue(!value);
+	}
+	
+	operation print() {
+		Transcript.crShow(value);
+	}
+}
+\end{lstlisting}
+
+\begin{lstlisting}[language=Compo, frame=single, caption=Composant B]
+Descriptor B extends Component
+{
+	provides {
+		default : { setValue(v); print();};
+	} 
+	
+	requires {
+		value: SmallInteger;
+	}
+	
+	operation setValue(v) {
+		value >>> v;
+	}
+	
+	operation print() {
+		Transcript.crShow('' value.asString());
+	}
+}
+\end{lstlisting}
+
+\newpage
+
+\begin{lstlisting}[language=Compo, frame=single, caption=Programme]
+Descriptor Program extends Component
+{
+	provides {
+		default : {printValues(); changeValA(); initProv(); initReq(); };
+	} 
+	
+	internally requires {
+		a: A;
+		b: B;
+	}
+	
+	architecture {
+		a >>> default@(A.new());
+		b >>> default@(B.new());
+		b@a >>> default@b;
+		value@a >>> 1;
+	}
+	
+	operation printValues(){
+	   a.print();
+	   b.print();
+	}
+	
+	operation changeValA(){
+	    a.setVal(2);
+	}
+	
+	operation initProv(){
+	    a.initProv();
+	}
+	
+	operation initReq(){
+	    a.initReq();
+	}
+	
+}
+\end{lstlisting}
+
+
+
+
+
+\chapter{Création d'une règle pour le \textit{parseur}}
+
+COMPO utilise le \textit{framework} \texttt{PetitParser} pour l'analyse syntaxique. Il permet la création d'un \textit{AST} grâce à des règles de constructions. Nous allons étudier comment COMPO utilise \texttt{PetitParser}.
+
+\section*{Les différents \textit{packages}}
+
+\subsubsection{Compo parser core}
+Ce \textit{package} contient principalement deux classes à savoir :
+
+\begin{itemize}
+\item \texttt{PPCompoGrammar} : contient les règles syntaxique
+\item \texttt{PPCompoParser} : création des "nodes"
+\end{itemize}
+	
+\subsubsection{Compo parser node}
+Ce package contient une série de nodes, les nodes ont leurs propres attributs mais surtout implémentent une méthode nommé \texttt{visitNode}.
+Par la suite, un autre élément va parcourir ces nodes grâce à l'implémentation du design pattern "visiteur" afin de généré du code.
+
+\subsubsection{Compo parser visitor}
+Ce package est l'élément de l'implémentation qui va s'occuper de parcourir les nodes, il contient une classe très importante nommé
+CompoToSmalltalk, cette classe a pour but de généré du code Smalltalk.
+
+\section*{Fonctionnement du parseur}
+Le point d'entrée du \textit{parseur} est à la méthode \texttt{start} de \texttt{PPCompoGrammar}. Elle est appellée lorsque l'on fait \textit{accept} dans \texttt{CompoBrowser}.
+
+\section*{Création d'une règle}
+Il faut d'abord créer un attribut de classe du nom de la règle qu'on va créer, ensuite il suffit de faire une méthode du même nom, 
+et renvoyer un token que PetitParser va comprendre. Ce token ressemble à une expression régulière, voici quelques exemple de règles extrait de \citep{rulesParseur}
+\begin{itemize}
+\item  Création d'un literal
+    \begin{itemize}
+    \item (<nom du literal> asParser) 
+    \item Ex :  ('connect' asParser);
+    \end{itemize}
+\item  Pour la détection de nombre, chaine de caractere, ... des symboles ont été crée : $\#letter$, $\#word$, ...;
+
+\item Detection d'un token [0..n]
+    \begin{itemize}
+    \item <token> star
+    \item Ex : (('connect' asParser) star); 
+    \end{itemize}
+
+\item Detection d'un token [1..n]
+    \begin{itemize}
+    \item <token> plus;
+    \item  Ex : (('connect' asParser) plus); 
+    \end{itemize}
+
+\item Detection de la suite token1 puis token2 : <token1>, <token2>;
+\item  Detection token2 si token1 echoue : (<token1> / <token2>);
+\end{itemize}
+
+%% Mettre en ref :  http://pharobooks.gforge.inria.fr/PharoByExampleTwo-Eng/latest/PetitParser.pdf.
+
+Ensuite, il suffit de rajouté une méthode du même nom dans PPCompoParser et de la définir ainsi :
+
+
+\begin{lstlisting}[language=Compo, frame=single, caption=Création d'une régle]
+<ma_nouvelle_regle>
+	^ super <ma_nouvelle_regle>
+\end{lstlisting}
+	
+PPCompoParser herite de PPCompoGrammar, ainsi la règle est implémenté et prêt à l'utilisation.
+
+\section*{Création d'un node}
+Là, il n y a pas grande chose à faire, il suffit de faire une sous classe de \texttt{PPCompoNode}, et d'ajouter à cette classe la méthode \texttt{visitNode}, 
+qui va appelé une méthode qu'on défini dans \texttt{CompoToSmalltalk} avec comme argument, lui même.
+
+\section*{Génération de code}
+Maintenant, on écrit la méthode dans \texttt{CompoToSmalltalk}. Cette méthode prend en argument le node.
+Afin de générer du code, on utilise l'objet CodeStream, qui a une méthode NextPutAll qui prend le code en argument et qui génère le code.
+
+\section*{Problème des littéraux (rock bottom)}
+COMPO est fait de façon à ce que lors que l'on écrit
+
+\begin{lstlisting}[language=Compo, frame=single, caption=]
+connect <lport>@<lcomp> to <rport>@<rcomp>
+\end{lstlisting}
+
+\texttt{lcomp} et \texttt{rcomp} sont des
+chaines de caractères (du moins dans la clause architecture). La deduction de ce que sont ces chaines de caractère est fait 
+lors de la création des connections dans \texttt{ComponentBuilder}. Ainsi, pour un littéral en plus d'ajouter la règle syntaxique, il faut
+corriger le comportement de ce \texttt{ComponentBuilder} afin qu'il detecte les litéraux.
 
 
 \end{appendices}
