@@ -682,20 +682,6 @@ connect compteurVal@self to 3.14;
 connect compteurVal@self to 'Hello World';
 \end{lstlisting}
 
-\section{Nouvelle syntaxe d'une connexion}
-
-A la manière de l'affectation SmallTalk, nous avons implémenté une nouvelle syntaxe de connexion. Nous avons choisi $>>>$ qui peut donc remplacer le traditionnel \texttt{connect to}. Cette syntaxe moins verbeuse permet également de s'abstraire du \texttt{@self}.
-
-\begin{lstlisting}[language=Compo, frame=single, caption=Comparaison entre l'ancienne et la nouvelle syntaxe d'une connexion]
-"Nouvelle syntaxe"
-compteurVal >>> 1;
-
-"Ancienne syntaxe"
-connect compteurVal@self to 1;
-\end{lstlisting}
-
-Les deux syntaxes sont actuellement valide pour définir une affectation.
-
 
 \section{Enchainement des \texttt{connect} sur un même port}
 
@@ -726,6 +712,44 @@ connect compteurVal@self to 3;
 
 Cet enchaînement permet de se connecter au port \texttt{1}, \texttt{2}, puis \texttt{3}. Cet abstraction permet à l'utilisateur de ne pas utiliser le mot clé \texttt{disconnect} entre chaque opération. Celui-ci sera fait automatiquement par COMPO. 
 
+\section{Nouvelle syntaxe d'une connexion}
+
+A la manière de l'affectation SmallTalk, nous avons implémenté une nouvelle syntaxe de connexion. Nous avons choisi $>>>$ qui peut donc remplacer le traditionnel \texttt{connect to}. Cette syntaxe moins verbeuse permet également de s'abstraire du \texttt{@self}.
+
+\begin{lstlisting}[language=Compo, frame=single, caption=Comparaison entre l'ancienne et la nouvelle syntaxe d'une connexion]
+"Nouvelle syntaxe"
+compteurVal >>> 1;
+
+"Ancienne syntaxe"
+connect compteurVal@self to 1;
+\end{lstlisting}
+
+Les deux syntaxes sont actuellement valide pour définir une affectation.
+
+\section{Ajout de primitives SmallTalk en COMPO}
+
+COMPO étant basé sur SmallTalk, il peut être intéressant pour un développeur de pouvoir utiliser des primitives.
+Nous avons donc rajouté une syntaxe qui permet d'indiquer à l'analyseur syntaxique que ce qui suit est une primitive SmallTalk. 
+
+\begin{lstlisting}[language=JAVA, frame=single, caption=Syntaxe d'une primitive smalltalk en COMPO]
+<! 
+    Transcript crShow: 'Hello'.
+>
+\end{lstlisting}
+
+\section{Définir un \texttt{service} avec le mot clé \texttt{operation} }
+
+Lors de discutions avec des non initié au langage COMPO, l'utilisation du mot clé \texttt{service} comporté des ambiguïtés. Pour faciliter la compréhenssion du langage, le mot clé \texttt{service} a été remplacé par le mot clé \texttt{operation}. Ce dernier permet de faire le paralléle plus facilement avec les autres langages.
+
+\begin{lstlisting}[language=COMPO, frame=single, caption=Syntaxe d'une opération en COMPO]
+operation foo() {
+    "TODO"
+}
+\end{lstlisting}
+
+Il est donc possible d'utiliser les deux mots clés dans le langage pour définir un service.
+
+
 \section{Vérification de compatibilité lors des connexions}
 
 Nous avons donc rajouté une vérification des compatibilités de connexions.
@@ -738,7 +762,6 @@ Quand le développeur fait un \textit{accept}, une erreur lui indique si il a fa
 internally requires {
     myPort : { foo() };
 }
-
 architecture {
     connect myPort@self to default@(MyComponent.new());
 }
@@ -754,15 +777,12 @@ Incompatible interfaces between myPort@self and default@(MyComponent.new());
 
 Une seconde vérification de comptabilité est faite à l'exécution car il est possible d'effectuer un \texttt{connect} dans un service.
 
-\clearpage
-
 \begin{lstlisting}[language=Compo, frame=single, caption=Extrait d'un descripteur Compteur]
 Descriptor Compteur extends Component
 {
 	requires {
 		printer: { foo(); };
 	}
-	
 }
 \end{lstlisting}
 
@@ -784,16 +804,7 @@ L'éxécution de ce service \textit{init} plantera à l'éxécution si \texttt{P
 Incompatible interfaces between printer and printing
 \end{lstlisting}
 
-\section{Ajout de primitives SmallTalk en COMPO}
 
-COMPO étant basé sur SmallTalk, il peut être intéressant pour un développeur de pouvoir utiliser des primitives.
-Nous avons donc rajouté une syntaxe qui permet d'indiquer à l'analyseur syntaxique que ce qui suit est une primitive SmallTalk. 
-
-\begin{lstlisting}[language=JAVA, frame=single, caption=Syntaxe d'une primitive smalltalk en COMPO]
-<! 
-    Transcript crShow: 'Hello'.
->
-\end{lstlisting}
 
 \section{Retour par port requis ou fourni}
 
@@ -827,22 +838,24 @@ service foo() {
 \end{lstlisting}
 
 Lors de la définition d'un service, un composant peut choisir de retourner directement un port requis.
+Nous donnons en Annexe \ref{annexeretourcomparaison} un exemple pour montrer la différence de comportement entre ces deux modes de retours.
 
 
 \section{Passage d'arguments par fourni ou requis}
 
+Nous avons implémenté la possibilité de choisir le mode de passage. Si l'on précéde la variable par un \texttt{!}, cela reviens à passer le port directement. Le choix du mode de passage est totalement transparent pour le receveur.
 
-\section{Remplacement du mot clé \texttt{service} par \texttt{operation} }
-
-Lors de discutions avec des non initié au langage COMPO, l'utilisation du mot clé \texttt{service} comporté des ambiguïtés. Pour faciliter la compréhenssion du langage, le mot clé \texttt{service} a été remplacé par le mot clé \texttt{operation}. Ce dernier permet de faire le paralléle plus facilement avec les autres langages.
-
-\begin{lstlisting}[language=COMPO, frame=single, caption=Syntaxe d'une opération en COMPO]
-operation foo() {
-    "TODO"
-}
+\begin{lstlisting}[language=COMPO, frame=single, caption=Syntaxe du passage par founis en COMPO]
+a.foo(var);
 \end{lstlisting}
 
-Il est donc possible d'utiliser les deux mots clés dans le langage pour définir un service.
+\begin{lstlisting}[language=COMPO, frame=single, caption=Syntaxe du passage par requis en COMPO]
+a.foo(!var);
+\end{lstlisting}
+
+Imaginons que le composant \texttt{A} enregistre cette \texttt{var} grâce à la méthode \texttt{foo}. Si on change ce qui est connecté à mon port \texttt{var} à l'extérieure de \texttt{A} il sera également modifié dans \texttt{A}.
+
+Nous donnons en Annexe \ref{passagereqprovider} un exemple pour montrer la différence de comportement entre ces deux modes de passages.
 
 \chapter{Conclusion}
 
@@ -853,7 +866,7 @@ COMPO est actuellement l'un des seul langage de programmation orienté composant
 
 \section{Nos contributions}
 
-Nous avons souhaité contribué au langage COMPO pour améliorer ça syntaxe, mais également ses possibilités.
+Nous avons souhaité contribuer au langage COMPO pour améliorer ça syntaxe, mais également ses possibilités.
 
 \section{Difficultés rencontrées}
 
@@ -1302,8 +1315,6 @@ Port is not connected
 \end{lstlisting}
 
 
-
-
 \begin{lstlisting}[language=Compo, frame=single, caption=Exemple d'une deconnexion à distance]
 Descriptor ABC extends Component
 {
@@ -1400,7 +1411,7 @@ Descriptor C extends Component
 
 
 \chapter{Comparaison entre les deux types de retour en COMPO}
-
+\label{annexeretourcomparaison}
 
 Le but de cette exemple est de montrer la différences entre les deux types de retours.
 
@@ -1433,7 +1444,6 @@ Increntation du compteur
 compteur : 2
 suiveur : 1
 \end{lstlisting}
-
 
 On remarque que lorsque l'on incrémente le compteur, le suiveur n'est pas modifié. En effet, le suiveur s'est connecté directement sur la valeur que possédé le compteur c'est à dire 1. Lorsque l'on incrémente le compteur est modifié. Cependant le suiveur reste connecté à la valeur que on lui avait donnée, autrement dit 1.
 
@@ -1553,15 +1563,15 @@ Descriptor Compteur extends Component
 
 
 \chapter{Comparaison entre les deux types de passages en COMPO}
+\label{passagereqprovider}
 
-
-
+Prennons un composant \texttt{A} et un composant \texttt{B}. Tout deux posséde un port \texttt{value}. Le composant \texttt{A} va passer au composant \texttt{B} son port \texttt{value}.
 
 \begin{figure}[H]
 \centering
 \includegraphics[scale=0.7, keepaspectratio=true]{passagereqprov}
 \caption{Schéma du programme extrait de \texttt{Compobrowser2}}
-\label{compteursuiveur}
+\label{passagereqprov}
 \end{figure}
 
 
@@ -1587,6 +1597,8 @@ A : 2
 B : 1
 \end{lstlisting}
 
+On remarquera que B n'a pas été modifié quand on a modifié ce qui été connecté au port \texttt{value} du composant \texttt{A} avec le mode de passage par défault.
+
 \begin{lstlisting}[language=Compo, frame=single, caption=Workspace (Passage par Requis)]
 |prog|
 prog := Program.new();
@@ -1605,6 +1617,8 @@ B : 1
 A : 2
 B : 2
 \end{lstlisting}
+
+Avec le mode de passage par requis, cette fois le composant \texttt{B} a bien été modifié en même temps que \texttt{A}
 
 \newpage
 
