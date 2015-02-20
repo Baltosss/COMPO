@@ -1,0 +1,38 @@
+Descriptor CompteurPolice extends Component
+{
+	provides {
+		default: {
+			 incrementer(); 
+			 incrementer(val); 
+			 showResult();
+		};
+	}
+	
+	internally requires {
+			compteurVal : SmallInteger;
+	}
+	
+	requires {
+		printer: { print(txt); };
+	}
+	
+	architecture {
+	    connect compteurVal@self to 0;
+	}
+	
+	service incrementer(val) {
+	    | t |
+	    t := compteurVal.asString().asInteger() + val;
+	    connect compteurVal@self to t;
+	}
+	
+	service incrementer() {
+	    | t |
+	    t := compteurVal.asString().asInteger() + 1;
+	    connect compteurVal@self to t;
+	}
+	
+	service showResult() {
+		printer.print(compteurVal.asString());
+	}
+}

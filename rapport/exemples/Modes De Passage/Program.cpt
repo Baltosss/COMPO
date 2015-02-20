@@ -1,0 +1,36 @@
+Descriptor Program extends Component
+{
+	provides {
+		default : {printValues(); changeValA(); initProv(); initReq(); };
+	} 
+	
+	internally requires {
+		a: A;
+		b: B;
+	}
+	
+	architecture {
+		a >>> default@(A.new());
+		b >>> default@(B.new());
+		b@a >>> default@b;
+		value@a >>> 1;
+	}
+	
+	operation printValues(){
+	   a.print();
+	   b.print();
+	}
+	
+	operation changeValA(){
+	    a.setVal(2);
+	}
+	
+	operation initProv(){
+	    a.initProv();
+	}
+	
+	operation initReq(){
+	    a.initReq();
+	}
+	
+}

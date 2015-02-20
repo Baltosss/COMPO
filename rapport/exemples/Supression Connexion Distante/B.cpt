@@ -1,0 +1,14 @@
+Descriptor B extends Component
+{
+	provides {
+		default: { barB(); };
+	}
+	
+	requires {
+		c : C;
+	}
+	
+	service barB() {
+		c.barC();
+	}
+}

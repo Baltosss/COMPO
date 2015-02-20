@@ -1,0 +1,26 @@
+Descriptor A extends Component
+{
+	provides {
+		default : { initProv(); initReq(); print(); setValue(val); };
+	}
+	
+	requires {
+		value : SmallInteger;
+		b : B;
+	}
+
+	operation setValue(val){
+	    value >>> val;												
+	}
+	
+	operation initProv() {
+		b.setValue(value);	
+	}																								
+	operation initReq() {
+		b.setValue(!value);
+	}
+	
+	operation print() {
+		Transcript.crShow(value);
+	}
+}

@@ -1,0 +1,27 @@
+Descriptor Program extends Component
+{
+	provides {
+		default: {
+			incrementer();
+			print();
+		 };
+	}
+	internally requires {
+		compteur : Compteur;
+		printer: Printer;
+	}
+	architecture {
+        connect compteur@self to default@(CompteurPolice.new());
+	    "connect compteur@self to default@(CompteurSyndicat.new());"
+        connect printer@self to default@(Printer.new());
+        connect printer@compteur to printing@printer;
+	}
+	
+	service incrementer() {
+		compteur.incrementer();
+	}
+	
+	service print() {
+		compteur.showResult();
+	}
+}

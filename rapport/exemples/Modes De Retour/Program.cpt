@@ -1,0 +1,28 @@
+Descriptor Program extends Component
+{
+	provides {
+		default: {init1(); init2(); incrementer();};
+	}
+	internally requires {
+		compteur : {incrementer();getCompteurVal();getCompteurValReq();printValue();};
+		suiveur: {getCompteurVal(); setCompteurVal(cpt);printValue();};
+	}
+	architecture {
+	    compteur >>> default@(Compteur.new());
+	    suiveur >>> default@(Suiveur.new());
+	}
+	operation init1() {
+    	suiveur.setCompteurVal(compteur.getCompteurVal());
+	}
+	operation init2() {
+        suiveur.setCompteurVal(compteur.getCompteurValReq());
+	}
+	operation printCompteurs() {
+        compteur.printValue();
+        suiveur.printValue();
+	}
+	operation incrementer(){
+        Transcript.crShow('Incrementation du compteur');
+        compteur.incrementer();
+	}
+}

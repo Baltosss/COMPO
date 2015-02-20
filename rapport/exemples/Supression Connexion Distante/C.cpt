@@ -1,0 +1,11 @@
+Descriptor C extends Component
+{
+	provides {
+		default: { barC(); };
+	}
+	
+	service barC(){
+		<!	"Primitive SmallTalk"
+		    Transcript crShow: 'Hello'.	 > 
+	}
+}

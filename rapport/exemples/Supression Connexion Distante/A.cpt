@@ -1,0 +1,20 @@
+Descriptor A extends Component
+{
+	provides {
+		default: {
+			fooA();	barA();
+		 };
+	}
+	
+	requires {
+		b : B;
+	}
+	
+	service fooA() {
+		disconnect c@(b@self) from default@(c@(b@self));
+	}
+	
+	service barA() {
+		b.barB();
+	}
+}

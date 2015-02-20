@@ -1,0 +1,34 @@
+Descriptor Compteur extends Component
+{
+	provides {
+		default: {incrementer(); getCompteurVal(); getCompteurValReq(); printValue();};
+	}
+	
+	internally requires {
+		compteurVal: SmallInteger;
+	}
+	
+	architecture {
+	    compteurVal >>> 1;
+	}
+	
+	operation getCompteurVal() {
+	    "retourne la valeur connectee"
+		return compteurVal;
+	}
+	
+	operation getCompteurValReq() {
+	    "retourne le port directement"
+		return !compteurVal;
+	}
+	
+	operation incrementer() {
+	    | t |
+	    t := compteurVal.asString().asInteger() + 1;
+	    compteurVal >>> t;
+	}
+	
+	operation printValue() {
+	    Transcript.crShow(compteurVal.asString());
+	}
+}

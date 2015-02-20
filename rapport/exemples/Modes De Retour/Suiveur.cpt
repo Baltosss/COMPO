@@ -1,0 +1,20 @@
+Descriptor Suiveur extends Component
+{
+	provides {
+		default: {getCompteurVal(); setCompteurVal(cptVal);};
+	}
+	
+	requires {
+		compteurVal: SmallInteger;
+	}
+	
+	operation getCompteurVal() {
+		return compteurVal;
+	}
+	operation setCompteurVal(cptVal) {
+		compteurVal >>> cptVal;
+	}
+	operation printValue() {
+	    Transcript.crShow(compteurVal.asString());
+	}
+}

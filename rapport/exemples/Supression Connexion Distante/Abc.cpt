@@ -1,0 +1,30 @@
+Descriptor ABC extends Component
+{
+	provides {
+		default: { foo(); bar(); };
+	}
+	
+	internally requires {
+		a : A;
+		b : B;
+		c : C;
+	}
+	
+	architecture {
+		connect a@self to default@(A.new());
+		connect b@self to default@(B.new());
+		connect c@self to default@(C.new());
+		
+		connect b@a to default@b;
+		connect c@b to default@c;
+	
+	}
+	
+	service foo (){
+		a.fooA();
+	}
+	
+	service bar() {
+		a.barA();
+	}
+}

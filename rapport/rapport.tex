@@ -838,7 +838,7 @@ service foo() {
 \end{lstlisting}
 
 Lors de la définition d'un service, un composant peut choisir de retourner directement un port requis.
-Nous donnons en Annexe \ref{annexeretourcomparaison} un exemple pour montrer la différence de comportement entre ces deux modes de retours.
+Nous donnons en Annexe \ref{annexeretourcomparaison} un exemple pour montrer la différence de comportement entre ces deux modes de retour.
 
 
 \section{Passage d'arguments par fourni ou requis}
@@ -1410,10 +1410,10 @@ Descriptor C extends Component
 
 
 
-\chapter{Comparaison entre les deux types de retour en COMPO}
+\chapter{Comparaison entre les deux modes de retour en COMPO}
 \label{annexeretourcomparaison}
 
-Le but de cette exemple est de montrer la différences entre les deux types de retours.
+Le but de cette exemple est de montrer la différences entre les deux modes de retours.
 
 Pour cela, on utilise un compteur classique. Un second composant qui est \texttt{suiveur} possède un port \texttt{compteurVal}. Nous allons montrer que l'on peut synchroniser les deux compteur pour que lorsque l'on incrémente le compteur, le port interne \texttt{compteurVal} du suiveur se met à jour automatiquement.
 
@@ -1562,7 +1562,7 @@ Descriptor Compteur extends Component
 \end{lstlisting}
 
 
-\chapter{Comparaison entre les deux types de passages en COMPO}
+\chapter{Comparaison entre les deux modes de passages en COMPO}
 \label{passagereqprovider}
 
 Prennons un composant \texttt{A} et un composant \texttt{B}. Tout deux posséde un port \texttt{value}. Le composant \texttt{A} va passer au composant \texttt{B} son port \texttt{value}.

@@ -1,0 +1,18 @@
+Descriptor B extends Component
+{
+	provides {
+		default : { setValue(v); print();};
+	} 
+	
+	requires {
+		value: SmallInteger;
+	}
+	
+	operation setValue(v) {
+		value >>> v;
+	}
+	
+	operation print() {
+		Transcript.crShow('' value.asString());
+	}
+}
